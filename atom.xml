@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
-    <id>https://github.com/Mozziehh/Mozziehh.github.io</id>
+    <id>https://Mozziehh.github.io</id>
     <title>差不多的胡先生</title>
-    <updated>2019-11-21T13:28:21.379Z</updated>
+    <updated>2019-11-21T13:29:33.897Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
-    <link rel="alternate" href="https://github.com/Mozziehh/Mozziehh.github.io"/>
-    <link rel="self" href="https://github.com/Mozziehh/Mozziehh.github.io/atom.xml"/>
+    <link rel="alternate" href="https://Mozziehh.github.io"/>
+    <link rel="self" href="https://Mozziehh.github.io/atom.xml"/>
     <subtitle>Talk is cheap, show me the Code.</subtitle>
-    <logo>https://github.com/Mozziehh/Mozziehh.github.io/images/avatar.png</logo>
-    <icon>https://github.com/Mozziehh/Mozziehh.github.io/favicon.ico</icon>
+    <logo>https://Mozziehh.github.io/images/avatar.png</logo>
+    <icon>https://Mozziehh.github.io/favicon.ico</icon>
     <rights>All rights reserved 2019, 差不多的胡先生</rights>
     <entry>
         <title type="html"><![CDATA[Hello Gridea]]></title>
-        <id>https://github.com/Mozziehh/Mozziehh.github.io/post/hello-gridea</id>
-        <link href="https://github.com/Mozziehh/Mozziehh.github.io/post/hello-gridea">
+        <id>https://Mozziehh.github.io/post/hello-gridea</id>
+        <link href="https://Mozziehh.github.io/post/hello-gridea">
         </link>
         <updated>2018-12-11T16:00:00.000Z</updated>
         <summary type="html"><![CDATA[<p>👏  欢迎使用 <strong>Gridea</strong> ！<br>
