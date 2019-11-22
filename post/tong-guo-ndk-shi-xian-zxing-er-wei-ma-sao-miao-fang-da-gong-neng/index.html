@@ -1,0 +1,677 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>通过NDK实现Zxing二维码扫描放大功能 | 差不多胡先生</title>
+<meta name="description" content="书山有路勤为径，学海无涯苦作舟" />
+<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1574383604073">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://Mozziehh.github.io/styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://Mozziehh.github.io">
+  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1574383604073" alt="">
+  </a>
+  <h1 class="site-title">
+    差不多胡先生
+  </h1>
+  <p class="site-description">
+    书山有路勤为径，学海无涯苦作舟
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              通过NDK实现Zxing二维码扫描放大功能
+            </h2>
+            <div class="post-info">
+              <span>
+                2019-11-22
+              </span>
+              <span>
+                16 min read
+              </span>
+              
+                <a href="https://Mozziehh.github.io/tag/Ls3a6rVaYa" class="post-tag">
+                  # NDK
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <p> 在各个APP中几乎都能看见它的身影。二维码扫描虽然是一个普通的功能，但是在APP中占依然都放在很抢眼的位置。比如像淘宝、58这类APP主要解决PC端扫码登录，微信、支付宝这类主要使用支付，摩拜小蓝这类APP主要是用于扫码骑车。所以，能更快捷更方便的使用二维码，可以极大的提升用户体验。</p>
+<p>##快捷与方便<br>
+ 曾经或许会有那么一个寒冷的夜晚，你骑着刚共享单车飞驰在回家的路上，突然，街边飘来哈尔滨烤冷面的香气让你不知不觉的来到那个小摊面前，迟疑了很久，你说了一句：“老板，来一份。。。再。。。加个肠。”昏暗的灯光下、其他的食客中，老板熟练的抄起手中的家伙，你熟练掏出手机，打开扫一扫，老板的二维码在你的手里一次次对焦、一次次放大，“滴”的一声，付钱，取餐，嗝~。<br>
+ 你有没有想过，为什么在扫描的过程中，被扫描的二维码会在扫描框里从模糊到清晰，然后再从清晰到模糊，周而复始？<br>
+ 你有没有想过，为什么在稍远的距离，二维码扫描就会慢慢放大？<br>
+ 是的，在这个寒冷的夜，为了能让你的手机更快速的识别出对方的二维码，我们做了很多。</p>
+<p>##二维码解读</p>
+<p>我们来看一下二维码扫描主要展示信息，主要分为功能图形和编码区格式。其中功能图形的位置探测图形、定位图形、矫正图形在定位的过程中起着举足轻重的地位。</p>
+<figure data-type="image" tabindex="1"><img src="https://github.com/Mozziehh/mypapers/blob/master/images/qrcode_structure.png?raw=true" alt=""></figure>
+<p>##二维码扫描的源码解读<br>
+ 从你拿出手机对准二维码直到扫描结束，整个过程都发生了什么？为了能让你生动的了解整个过程，我打算用下面的方式讲：<br>
+打开相机执行扫描-&gt;获取Byte流-&gt;灰度-&gt;二值化-&gt;霍夫变换-&gt;找到二维码定位点-&gt;识别-&gt;返回结果。</p>
+<p>###打开相机执行扫描</p>
+<pre><code>private void initCamera(SurfaceHolder surfaceHolder) {
+        if (surfaceHolder == null) {
+            throw new IllegalStateException(&quot;No SurfaceHolder provided&quot;);
+        }
+        if (cameraManager.isOpen()) {
+            Log.w(TAG, &quot;initCamera() while already open -- late SurfaceView callback?&quot;);
+            return;
+        }
+        try {
+            cameraManager.openDriver(surfaceHolder);
+            // Creating the handler starts the preview, which can also throw a
+            // RuntimeException.
+            if (handler == null) {
+                handler = new CaptureActivityHandler(this, cameraManager, DecodeThread.ALL_MODE);
+            }
+
+            initCrop();
+        } catch (IOException ioe) {
+            Log.w(TAG, ioe);
+            displayFrameworkBugMessageAndExit();
+        } catch (RuntimeException e) {
+            // Barcode Scanner has seen crashes in the wild of this variety:
+            // java.?lang.?RuntimeException: Fail to connect to camera service
+            Log.w(TAG, &quot;Unexpected error initializing camera&quot;, e);
+            displayFrameworkBugMessageAndExit();
+        }
+    }
+</code></pre>
+<p>###设置支持的二维码类型</p>
+<p>目前二维码支持如下类型：<br>
+<img src="https://i.loli.net/2019/06/17/5d0734bfd44a794589.png" alt="support-zxing-pic.png"><br>
+代码在这里配置：</p>
+<pre><code>// The prefs can't change while the thread is running, so pick them up once here.
+    if (decodeFormats == null || decodeFormats.isEmpty()) {
+      SharedPreferences prefs = PreferenceManager.getDefaultSharedPreferences(activity);
+      decodeFormats = EnumSet.noneOf(BarcodeFormat.class);
+      if (prefs.getBoolean(PreferencesActivity.KEY_DECODE_1D_PRODUCT, true)) {
+        decodeFormats.addAll(DecodeFormatManager.PRODUCT_FORMATS);
+      }
+      if (prefs.getBoolean(PreferencesActivity.KEY_DECODE_1D_INDUSTRIAL, true)) {
+        decodeFormats.addAll(DecodeFormatManager.INDUSTRIAL_FORMATS);
+      }
+      if (prefs.getBoolean(PreferencesActivity.KEY_DECODE_QR, true)) {
+        decodeFormats.addAll(DecodeFormatManager.QR_CODE_FORMATS);
+      }
+      if (prefs.getBoolean(PreferencesActivity.KEY_DECODE_DATA_MATRIX, true)) {
+        decodeFormats.addAll(DecodeFormatManager.DATA_MATRIX_FORMATS);
+      }
+      if (prefs.getBoolean(PreferencesActivity.KEY_DECODE_AZTEC, false)) {
+        decodeFormats.addAll(DecodeFormatManager.AZTEC_FORMATS);
+      }
+      if (prefs.getBoolean(PreferencesActivity.KEY_DECODE_PDF417, false)) {
+        decodeFormats.addAll(DecodeFormatManager.PDF417_FORMATS);
+      }
+    }
+    hints.put(DecodeHintType.POSSIBLE_FORMATS, decodeFormats);
+</code></pre>
+<p>###获取相机预览的Byte流</p>
+<pre><code>public class PreviewCallback implements Camera.PreviewCallback {
+
+	private static final String TAG = PreviewCallback.class.getSimpleName();
+
+	private final CameraConfigurationManager configManager;
+	private Handler previewHandler;
+	private int previewMessage;
+
+	public PreviewCallback(CameraConfigurationManager configManager) {
+		this.configManager = configManager;
+	}
+
+	public void setHandler(Handler previewHandler, int previewMessage) {
+		this.previewHandler = previewHandler;
+		this.previewMessage = previewMessage;
+	}
+
+	@Override
+	public void onPreviewFrame(byte[] data, Camera camera) {
+		Point cameraResolution = configManager.getCameraResolution();
+		Handler thePreviewHandler = previewHandler;
+		if (cameraResolution != null &amp;&amp; thePreviewHandler != null) {
+			Message message = thePreviewHandler.obtainMessage(previewMessage, cameraResolution.x, cameraResolution.y, data);
+			message.sendToTarget();
+			previewHandler = null;
+		} else {
+			Log.d(TAG, &quot;Got preview callback, but no handler or resolution available&quot;);
+		}
+	}
+
+}
+
+//在这里通过相机框获取bitmap的byte流
+PlanarYUVLuminanceSource source = activity.getCameraManager().buildLuminanceSource(data, width, height);
+
+BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
+
+</code></pre>
+<p>###对bitmap的byte流解码</p>
+<pre><code>if (formats != null) {
+  boolean addOneDReader =
+	  formats.contains(BarcodeFormat.UPC_A) ||
+	  formats.contains(BarcodeFormat.UPC_E) ||
+	  formats.contains(BarcodeFormat.EAN_13) ||
+	  formats.contains(BarcodeFormat.EAN_8) ||
+	  formats.contains(BarcodeFormat.CODABAR) ||
+	  formats.contains(BarcodeFormat.CODE_39) ||
+	  formats.contains(BarcodeFormat.CODE_93) ||
+	  formats.contains(BarcodeFormat.CODE_128) ||
+	  formats.contains(BarcodeFormat.ITF) ||
+	  formats.contains(BarcodeFormat.RSS_14) ||
+	  formats.contains(BarcodeFormat.RSS_EXPANDED);
+  // Put 1D readers upfront in &quot;normal&quot; mode
+  readers.add(new MultiFormatOneDReader(hints));
+  if (formats.contains(BarcodeFormat.QR_CODE)) {
+	readers.add(new QRCodeReader(mActivity));
+  }
+  if (formats.contains(BarcodeFormat.DATA_MATRIX)) {
+	readers.add(new DataMatrixReader());
+  }
+  if (formats.contains(BarcodeFormat.AZTEC)) {
+	readers.add(new AztecReader());
+  }
+  if (formats.contains(BarcodeFormat.PDF_417)) {
+	 readers.add(new PDF417Reader());
+  }
+  if (formats.contains(BarcodeFormat.MAXICODE)) {
+	 readers.add(new MaxiCodeReader());
+  }
+  // At end in &quot;try harder&quot; mode
+  readers.add(new MultiFormatOneDReader(hints));
+
+</code></pre>
+<h3 id="解码调用接口的实现类">解码，调用接口的实现类</h3>
+<pre><code>private Result decodeInternal(BinaryBitmap image) throws NotFoundException {
+    if (readers != null) {
+      for (Reader reader : readers) {
+        try {
+          return reader.decode(image, hints);
+        } catch (ReaderException re) {
+          // continue
+        }
+      }
+    }
+    throw NotFoundException.getNotFoundInstance();
+  }
+// QRCodeReader.java
+	@Override
+	  public final Result decode(BinaryBitmap image, Map&lt;DecodeHintType,?&gt; hints)
+		  throws NotFoundException, ChecksumException, FormatException {
+		DecoderResult decoderResult; //解析结果
+		ResultPoint[] points; //解析的点
+		if (hints != null &amp;&amp; hints.containsKey(DecodeHintType.PURE_BARCODE)) {
+		  //二值化：image.getBlackMatrix()
+		  BitMatrix bits = extractPureBits(image.getBlackMatrix());
+		  decoderResult = decoder.decode(bits, hints);
+		  points = NO_POINTS;
+		} else {
+		  //二值化：image.getBlackMatrix()
+		  DetectorResult detectorResult = new Detector(image.getBlackMatrix()).detect(hints);
+		  decoderResult = decoder.decode(detectorResult.getBits(), hints);
+		  points = detectorResult.getPoints();
+		}
+
+		// If the code was mirrored: swap the bottom-left and the top-right points.
+		if (decoderResult.getOther() instanceof QRCodeDecoderMetaData) {
+		  ((QRCodeDecoderMetaData) decoderResult.getOther()).applyMirroredCorrection(points);
+		}
+
+		Result result = new Result(decoderResult.getText(), decoderResult.getRawBytes(), points, BarcodeFormat.QR_CODE);
+		List&lt;byte[]&gt; byteSegments = decoderResult.getByteSegments();
+		if (byteSegments != null) {
+		  result.putMetadata(ResultMetadataType.BYTE_SEGMENTS, byteSegments);
+		}
+		String ecLevel = decoderResult.getECLevel();
+		if (ecLevel != null) {
+		  result.putMetadata(ResultMetadataType.ERROR_CORRECTION_LEVEL, ecLevel);
+		}
+		if (decoderResult.hasStructuredAppend()) {
+		  result.putMetadata(ResultMetadataType.STRUCTURED_APPEND_SEQUENCE,
+							 decoderResult.getStructuredAppendSequenceNumber());
+		  result.putMetadata(ResultMetadataType.STRUCTURED_APPEND_PARITY,
+							 decoderResult.getStructuredAppendParity());
+		}
+		return result;
+	  }
+
+
+	/**
+	   * &lt;p&gt;Detects a QR Code in an image.&lt;/p&gt;
+	   *
+	   * @param hints optional hints to detector
+	   * @return {@link DetectorResult} encapsulating results of detecting a QR Code
+	   * @throws NotFoundException if QR Code cannot be found
+	   * @throws FormatException if a QR Code cannot be decoded
+	   */
+	  public final DetectorResult detect(Map&lt;DecodeHintType,?&gt; hints) throws NotFoundException, FormatException {
+
+		resultPointCallback = hints == null ? null :
+			(ResultPointCallback) hints.get(DecodeHintType.NEED_RESULT_POINT_CALLBACK);
+
+		FinderPatternFinder finder = new FinderPatternFinder(image, resultPointCallback);
+		FinderPatternInfo info = finder.find(hints);
+
+		return processFinderPatternInfo(info);
+	  }
+
+</code></pre>
+<p>###定位特征点</p>
+<pre><code>	final FinderPatternInfo find(Map&lt;DecodeHintType,?&gt; hints) throws NotFoundException {
+		boolean tryHarder = hints != null &amp;&amp; hints.containsKey(DecodeHintType.TRY_HARDER);
+		int maxI = image.getHeight();
+		int maxJ = image.getWidth();
+		int iSkip = (3 * maxI) / (4 * MAX_MODULES);
+		if (iSkip &lt; MIN_SKIP || tryHarder) {
+		  iSkip = MIN_SKIP;
+		}
+
+		boolean done = false;
+		int[] stateCount = new int[5];
+		for (int i = iSkip - 1; i &lt; maxI &amp;&amp; !done; i += iSkip) {
+		  // Get a row of black/white values
+		  clearCounts(stateCount);
+		  int currentState = 0;
+		  for (int j = 0; j &lt; maxJ; j++) {
+			if (image.get(j, i)) {
+			  // Black pixel
+			  if ((currentState &amp; 1) == 1) { // Counting white pixels
+				currentState++;
+			  }
+			  stateCount[currentState]++;
+			} else { // White pixel
+			  if ((currentState &amp; 1) == 0) { // Counting black pixels
+				if (currentState == 4) { // A winner?
+				  if (foundPatternCross(stateCount)) { // Yes
+					boolean confirmed = handlePossibleCenter(stateCount, i, j);
+					if (confirmed) {
+					  iSkip = 2;
+					  if (hasSkipped) {
+						done = haveMultiplyConfirmedCenters();
+					  } else {
+						int rowSkip = findRowSkip();
+						if (rowSkip &gt; stateCount[2]) {
+						  i += rowSkip - stateCount[2] - iSkip;
+						  j = maxJ - 1;
+						}
+					  }
+					} else {
+					  shiftCounts2(stateCount);
+					  currentState = 3;
+					  continue;
+					}
+					// Clear state to start looking again
+					currentState = 0;
+					clearCounts(stateCount);
+				  } else { // No, shift counts back by two
+					shiftCounts2(stateCount);
+					currentState = 3;
+				  }
+				} else {
+				  stateCount[++currentState]++;
+				}
+			  } else { // Counting white pixels
+				stateCount[currentState]++;
+			  }
+			}
+		  }
+		  if (foundPatternCross(stateCount)) {
+			boolean confirmed = handlePossibleCenter(stateCount, i, maxJ);
+			if (confirmed) {
+			  iSkip = stateCount[0];
+			  if (hasSkipped) {
+				// Found a third one
+				done = haveMultiplyConfirmedCenters();
+			  }
+			}
+		  }
+		}
+	//找到定位点
+		FinderPattern[] patternInfo = selectBestPatterns();
+		ResultPoint.orderBestPatterns(patternInfo);
+
+		return new FinderPatternInfo(patternInfo);
+	  }
+
+	private static ResultPoint[] expandSquare(ResultPoint[] cornerPoints, float oldSide, float newSide) {
+		float ratio = newSide / (2 * oldSide);
+		float dx = cornerPoints[0].getX() - cornerPoints[2].getX();
+		float dy = cornerPoints[0].getY() - cornerPoints[2].getY();
+		float centerx = (cornerPoints[0].getX() + cornerPoints[2].getX()) / 2.0f;
+		float centery = (cornerPoints[0].getY() + cornerPoints[2].getY()) / 2.0f;
+
+		ResultPoint result0 = new ResultPoint(centerx + ratio * dx, centery + ratio * dy);
+		ResultPoint result2 = new ResultPoint(centerx - ratio * dx, centery - ratio * dy);
+
+		dx = cornerPoints[1].getX() - cornerPoints[3].getX();
+		dy = cornerPoints[1].getY() - cornerPoints[3].getY();
+		centerx = (cornerPoints[1].getX() + cornerPoints[3].getX()) / 2.0f;
+		centery = (cornerPoints[1].getY() + cornerPoints[3].getY()) / 2.0f;
+		ResultPoint result1 = new ResultPoint(centerx + ratio * dx, centery + ratio * dy);
+		ResultPoint result3 = new ResultPoint(centerx - ratio * dx, centery - ratio * dy);
+
+		return new ResultPoint[]{result0, result1, result2, result3};
+	  }
+</code></pre>
+<p>###返回结果</p>
+<pre><code>	protected final DetectorResult processFinderPatternInfo(FinderPatternInfo info)
+		  throws NotFoundException, FormatException {
+
+		FinderPattern topLeft = info.getTopLeft();
+		FinderPattern topRight = info.getTopRight();
+		FinderPattern bottomLeft = info.getBottomLeft();
+
+		float moduleSize = calculateModuleSize(topLeft, topRight, bottomLeft);
+		if (moduleSize &lt; 1.0f) {
+		  throw NotFoundException.getNotFoundInstance();
+		}
+		int dimension = computeDimension(topLeft, topRight, bottomLeft, moduleSize);
+		Version provisionalVersion = Version.getProvisionalVersionForDimension(dimension);
+		int modulesBetweenFPCenters = provisionalVersion.getDimensionForVersion() - 7;
+
+		AlignmentPattern alignmentPattern = null;
+		// Anything above version 1 has an alignment pattern
+		if (provisionalVersion.getAlignmentPatternCenters().length &gt; 0) {
+
+		  // Guess where a &quot;bottom right&quot; finder pattern would have been
+		  float bottomRightX = topRight.getX() - topLeft.getX() + bottomLeft.getX();
+		  float bottomRightY = topRight.getY() - topLeft.getY() + bottomLeft.getY();
+
+		  // Estimate that alignment pattern is closer by 3 modules
+		  // from &quot;bottom right&quot; to known top left location
+		  float correctionToTopLeft = 1.0f - 3.0f / modulesBetweenFPCenters;
+		  int estAlignmentX = (int) (topLeft.getX() + correctionToTopLeft * (bottomRightX - topLeft.getX()));
+		  int estAlignmentY = (int) (topLeft.getY() + correctionToTopLeft * (bottomRightY - topLeft.getY()));
+
+		  // Kind of arbitrary -- expand search radius before giving up
+		  for (int i = 4; i &lt;= 16; i &lt;&lt;= 1) {
+			try {
+			  alignmentPattern = findAlignmentInRegion(moduleSize,
+				  estAlignmentX,
+				  estAlignmentY,
+				  i);
+			  break;
+			} catch (NotFoundException re) {
+			  // try next round
+			}
+		  }
+		}
+
+		PerspectiveTransform transform =
+			createTransform(topLeft, topRight, bottomLeft, alignmentPattern, dimension);
+
+		BitMatrix bits = sampleGrid(image, transform, dimension);
+
+		ResultPoint[] points;
+		if (alignmentPattern == null) {
+		  points = new ResultPoint[]{bottomLeft, topLeft, topRight};
+		} else {
+		  points = new ResultPoint[]{bottomLeft, topLeft, topRight, alignmentPattern};
+		}
+		return new DetectorResult(bits, points);
+	  }
+</code></pre>
+<p>##问题来了<br>
+在阅读源码之后，我们发现这里面并没有解读放大相关的功能，这是为什么呢？<br>
+是的，因为Zxing库本来就没有提供放大的功能，那么我们想实现放大功能应该怎么做？<br>
+对，答案就是利用相机的放大功能setZoom来放大相机即可。<br>
+那么，什么时机放大呢？</p>
+<p>###相机放大功能和二维码建立关系<br>
+为了解决这个放大时机的问题，我们再来回顾一下源码。<br>
+有这样一段源码，它的作用是找到定位点：</p>
+<pre><code>		FinderPattern[] patternInfo = selectBestPatterns();
+		ResultPoint.orderBestPatterns(patternInfo);
+
+		return new FinderPatternInfo(patternInfo);
+	  }
+
+	private static ResultPoint[] expandSquare(ResultPoint[] cornerPoints, float oldSide, float newSide) {
+		float ratio = newSide / (2 * oldSide);
+		float dx = cornerPoints[0].getX() - cornerPoints[2].getX();
+		float dy = cornerPoints[0].getY() - cornerPoints[2].getY();
+		float centerx = (cornerPoints[0].getX() + cornerPoints[2].getX()) / 2.0f;
+		float centery = (cornerPoints[0].getY() + cornerPoints[2].getY()) / 2.0f;
+
+		ResultPoint result0 = new ResultPoint(centerx + ratio * dx, centery + ratio * dy);
+		ResultPoint result2 = new ResultPoint(centerx - ratio * dx, centery - ratio * dy);
+
+		dx = cornerPoints[1].getX() - cornerPoints[3].getX();
+		dy = cornerPoints[1].getY() - cornerPoints[3].getY();
+		centerx = (cornerPoints[1].getX() + cornerPoints[3].getX()) / 2.0f;
+		centery = (cornerPoints[1].getY() + cornerPoints[3].getY()) / 2.0f;
+		ResultPoint result1 = new ResultPoint(centerx + ratio * dx, centery + ratio * dy);
+		ResultPoint result3 = new ResultPoint(centerx - ratio * dx, centery - ratio * dy);
+
+		return new ResultPoint[]{result0, result1, result2, result3};
+</code></pre>
+<p>那么，我们是不是利用这个定位点，就可以和相机扫描框的间距搞一些事情就可以了？<br>
+事实上，网上也有很多例子是这么做的。<br>
+行，既然已经有了，那我们直接拿来用就可以了吧？<br>
+NONONO，事情并不是那么简单：<br>
+<img src="https://i.loli.net/2019/06/17/5d0758dd0179c16484.png" alt="bucunzai.png"></p>
+<p>##58APP二维码扫描的应用<br>
+因为58APP，用的不是Java实现的。核心解码流程使用的是C++，通过JNI编译生成的so，然后再打入到58APP里的。<br>
+兵来将挡水来土掩，行，既然java实现的思路已经有了，我们就用C++再写一遍怎么了，谁让咱也是科班出身。</p>
+<p>###找到核心C++实现<br>
+我们发现，是在这里执行的decode，然后也是调用了decodeWithState，然后将得到的结果返回给java。<br>
+仔细跟进去，发现逻辑差不多，只不过一个是用java，一个是用C++。</p>
+<pre><code>jbyte *yuvData = env-&gt;GetByteArrayElements(yuvData_, NULL);
+
+    std::string codeResult = &quot;&quot;;
+    try {
+        ......
+		省略部分代码
+        // Perform the decoding.
+        MultiFormatReader reader;
+        reader.setHints(hints);
+        Ref&lt;Result&gt; result(reader.decodeWithState(image));
+
+        // Output the result.
+        codeResult = result-&gt;getText()-&gt;getText();
+        cout &lt;&lt; result-&gt;getText()-&gt;getText() &lt;&lt; endl;
+    } catch (zxing::Exception&amp; e) {
+        cerr &lt;&lt; &quot;Error: &quot; &lt;&lt; e.what() &lt;&lt; endl;
+    }
+
+    env-&gt;ReleaseByteArrayElements(yuvData_, yuvData, 0);
+
+    return env-&gt;NewStringUTF(codeResult.c_str());
+</code></pre>
+<p>###QRCodeReader.cpp核心实现</p>
+<p>下面就是decode使用c++的核心实现，因为前面已经讲过了Java的实现，所以这里找到C++的代码也是非常容易的<br>
+这里我们看到，有一句</p>
+<pre><code>	Ref&lt;DetectorResult&gt; detectorResult(detector.detect(hints));
+</code></pre>
+<p>它的意思就是通过detect得到了detectorResult，然后通过下面的，</p>
+<pre><code>	ArrayRef&lt; Ref&lt;ResultPoint&gt; &gt; points (detectorResult-&gt;getPoints());
+</code></pre>
+<p>得到了points，即定位点；<br>
+一开始我想着把这个定位点独立出一个方法，然后再通过回调的形式传递给Java层，这样做的好处就是我们可以通过Java来实现放大功能。但是因为我们相机预览的速度是特别快的，所以这样做其实并不合适。于是，把相机的参数传递进去，然后在C++里面完成对于相机的放大。</p>
+<pre><code>QRCodeReader::QRCodeReader() :decoder_() {
+		}
+		//TODO: see if any of the other files in the qrcode tree need tryHarder
+		Ref&lt;Result&gt; QRCodeReader::decode(Ref&lt;BinaryBitmap&gt; image, DecodeHints hints) {
+			Detector detector(image-&gt;getBlackMatrix());
+			Ref&lt;DetectorResult&gt; detectorResult(detector.detect(hints));
+			ArrayRef&lt; Ref&lt;ResultPoint&gt; &gt; points (detectorResult-&gt;getPoints());
+			Ref&lt;DecoderResult&gt; decoderResult(decoder_.decode(detectorResult-&gt;getBits()));
+			Ref&lt;Result&gt; result(
+							   new Result(decoderResult-&gt;getText(), decoderResult-&gt;getRawBytes(), points, BarcodeFormat::QR_CODE));
+			return result;
+		}
+</code></pre>
+<p>###传递Java的Camera对象<br>
+主要是在原来的基础上多传递了扫描框的位置和Camera这个对象：</p>
+<pre><code>	xxx_QbarNative_decode(JNIEnv *env, jobject instance, jbyteArray bytes_, jint width,
+										  jint height, jint cropLeft, jint cropRight, jint cropTop,
+										  jint cropWidth, jint cropHeight, jboolean reverseHorizontal,
+										  jobject camera, jobject parameters)
+</code></pre>
+<p>###放大代码使用C++实现<br>
+最后，根据参数进行实现：简单的说就是判断二维码定位点的距离，然后用这个距离和相框之间的距离做个比对，小于一半，我们递增。</p>
+<pre><code>	//执行检测逻辑，检测得到执行放大照相机逻辑，否则执行解析逻辑
+	if(NULL != resultPoints &amp;&amp; !(resultPoints-&gt;empty())){
+		//省去部分核心代码
+
+		if(isZoomSupported){
+		//这里做了简化，主要解决放大倍数过多，使得二维码突然不在扫描框里。
+			if (len &lt;= frameWidth / 2){
+				if(zoom &lt; maxZoom){
+					zoom = zoom + 8;
+				}else{
+					zoom = maxZoom;
+				}
+				jmethodID setZoomMth = env-&gt;GetMethodID(parametersCls, &quot;setZoom&quot;, &quot;(I)V&quot;);
+				env-&gt;CallVoidMethod(parameters, setZoomMth, zoom);
+
+				jmethodID setParametersMth = env-&gt;GetMethodID(camearCls, &quot;setParameters&quot;, &quot;(Landroid/hardware/Camera$Parameters;)V&quot;);
+				env-&gt;CallVoidMethod(camera, setParametersMth, parameters);
+
+				env-&gt;ReleaseByteArrayElements(bytes_, yuvData, 0);
+				string ss = strStream.str();
+			}
+		}
+	}
+</code></pre>
+<p>###导出so，打入58APP<br>
+最后，在demo中运行一下，看看效果。<br>
+<img src="https://i.loli.net/2019/06/17/5d077e8e60ec060459.gif" alt="1557793019816360 (1).gif"></p>
+<p>##心得<br>
+其实最终解决这个问题不难，重点在于发现问题，解决问题的过程学到了什么。</p>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#%E8%A7%A3%E7%A0%81%E8%B0%83%E7%94%A8%E6%8E%A5%E5%8F%A3%E7%9A%84%E5%AE%9E%E7%8E%B0%E7%B1%BB">解码，调用接口的实现类</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://Mozziehh.github.io/post/shou-ba-shou-jiao-ni-ru-he-bu-shua-ji-hook-dai-ma">
+              <h3 class="post-title">
+                手把手教你如何不刷机Hook代码
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://Mozziehh.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+  // This should probably be throttled.
+  // Especially because it triggers during smooth scrolling.
+  // https://lodash.com/docs/4.17.10#throttle
+  // You could do like...
+  // window.addEventListener("scroll", () => {
+  //    _.throttle(doThatStuff, 100);
+  // });
+  // Only not doing it here to keep this Pen dependency-free.
+
+  window.addEventListener("scroll", event => {
+    let fromTop = window.scrollY;
+
+    mainNavLinks.forEach((link, index) => {
+      let section = document.getElementById(decodeURI(link.hash).substring(1));
+      let nextSection = null
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add("current");
+          } else {
+            link.classList.remove("current");    
+          }
+        } else {
+          link.classList.add("current");
+        }
+      } else {
+        link.classList.remove("current");
+      }
+    });
+  });
+
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
