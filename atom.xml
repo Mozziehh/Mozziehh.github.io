@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://Mozziehh.github.io</id>
     <title>差不多胡先生</title>
-    <updated>2019-11-22T00:47:08.432Z</updated>
+    <updated>2019-11-22T00:49:32.234Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://Mozziehh.github.io"/>
     <link rel="self" href="https://Mozziehh.github.io/atom.xml"/>
@@ -10,6 +10,521 @@
     <logo>https://Mozziehh.github.io/images/avatar.png</logo>
     <icon>https://Mozziehh.github.io/favicon.ico</icon>
     <rights>All rights reserved 2019, 差不多胡先生</rights>
+    <entry>
+        <title type="html"><![CDATA[GifView在android的应用指南]]></title>
+        <id>https://Mozziehh.github.io/post/gifview-zai-android-de-ying-yong-zhi-nan</id>
+        <link href="https://Mozziehh.github.io/post/gifview-zai-android-de-ying-yong-zhi-nan">
+        </link>
+        <updated>2019-11-22T00:48:04.000Z</updated>
+        <content type="html"><![CDATA[<p>##背景<br>
+目前，大部分市场应用在展示产品的时候都会选择图片配文字的形式，显得更加直观。随着人们手机设备性能的提高与Wifi以及4G网络的提速，为了能让用户的体验更加立体，很多APP在”秀“自己的产品的时候都会直接展示视频。然而图片和视频之间还是有一定的流量差距，为了让用户可以更好的过渡这一差距，图片展示gifview，点击gifview观看视频这样的用户行为正在慢慢的被接受。</p>
+<p>##部落来袭<br>
+58部落目前是非常大的用户群体，他们也会经常发表一些自己的作品，看法，目前也是列表页展示图片，点击进入后展示详情。那么如果需要有这个过渡，就需要在列表页上增加gifview来达到更好的曝光率。</p>
+<p>##大众点评&amp;马蜂窝</p>
+<p>###点评 &amp; 马蜂窝 效果展示</p>
+<!--todo-->
+<p>###效果分析<br>
+我们先来自己想想，如果要是我们自己来实现这个效果应该如何来做：</p>
+<p>两种方法：</p>
+<p><em><strong>方案一：</strong></em></p>
+<!--todo-->
+<p>1.使用recyclerview实现列表页用于展示；</p>
+<p>2.自定义GifView，包含展示静态图和gif图的功能；</p>
+<p>3.进入页面，请求首页，获取json得到gif；</p>
+<p>4.解析gif的第一帧，得到Image的比特流，让GifView展示图片；</p>
+<p>5.图片展示完成后，自定义GifView播放GifView；</p>
+<hr>
+<p>优点：</p>
+<p>简化json输出，json里面的返回值返回一套gif就可以，自己解析gif的第一帧用于展示图片；</p>
+<p>缺点：</p>
+<p>速度慢，本来列表页快速滑动展示大图片都考虑加载时间，如果再去自己解析，成本太高，内存要求大；</p>
+<hr>
+<p><em><strong>方案二：</strong></em></p>
+<!--todo-->
+<p>1.使用recyclerview实现列表页用于展示；</p>
+<p>2.自定义ImageView，展示Image；</p>
+<p>3.自定义GifView，展示gif图；</p>
+<p>4.进入页面，请求首页，获取json得到image和gif；</p>
+<p>5.自定义ImageView展示imageview占位，然后紧接着加载gif；</p>
+<p>优点：</p>
+<p>1.速度快；</p>
+<p>2.解耦，一旦出现问题，可以快速降级；</p>
+<hr>
+<p>另外，从版本的迭代的上来考虑，我个人更倾向于方案二：</p>
+<p>###点评效果深入研究<br>
+接下来，先上常规操作让我们看一下大众点评是不是酱样婶的吧：</p>
+<p>####dump一下，你不知道<br>
+Running activities (most recent first):<br>
+Run #1: ActivityRecord{1b8520 u0 com.dianping.v1/.NovaMainActivity t15792}<br>
+Run #0: ActivityRecord{2a47964 u0 com.tencent.mm/.ui.LauncherUI t15793}<br>
+Running activities (most recent first):<br>
+Run #0: ActivityRecord{945d44 u0 com.miui.home/.launcher.Launcher t1}<br>
+Running activities (most recent first):<br>
+Run #0: ActivityRecord{52d96ba u0 com.android.systemui/.recents.RecentsActivity t15788}<br>
+ACTIVITY MANAGER RUNNING PROCESSES (dumpsys activity processes)<br>
+User #0: state=RUNNING_UNLOCKED</p>
+<p>首先，我们来看一下dump信息，NovaMainActivity，是它的首页，但是显然根据这个我们没有任何头绪。正向查一个控件我们要知道哪个布局，哪个控件，哪个View。所以，我想能不能看看Log，结果还真的让我找到了蛛丝马迹。</p>
+<p>####logcat<br>
+2019-09-14 10:59:54.304 31909-31909/? D/GifImageView: gifIv has already been stoped:<br>
+2019-09-14 10:59:54.304 31909-31909/? D/GifImageView: gifIv has already been stoped:<br>
+2019-09-14 10:59:54.304 31909-31909/? D/GifImageView: gifIv has already been started:</p>
+<p>在我快速滑动的时候，我发现居然有这么些可爱的代码在控制台打印出来。于是，我就看到了新的曙光。</p>
+<p>万幸的是，我还在logcat里面额外看到了webp格式的图片和动图的日志：</p>
+<pre><code>//动图
+https://img.xxx.net/coverpic/2d348f2ea08616ab1e8c652800373740.webp
+//非动图
+https://img.xxx.net/coverpic/4cf4cfa5469f95444986f83f194f6acb35706.jpg%40320w_426h_1e_1c_1l%7Cwatermark%3D0.webp
+</code></pre>
+<p>这个日志初步印证了我的想法，我决定看一下&quot;GifImageVIew&quot;都干了啥。点评是有混淆和做了加壳的，常规的jd-gui查看的代码看不到。通过脱壳，获取其相关代码，为了更好地理解，里面的关键代码做了注释：</p>
+<pre><code>public class GifImageView extends FrameLayout {
+
+    public GifImageView(Context context) {
+        super(context);
+    }
+    public static final String TAG = &quot;GifImageView&quot;;
+    public PicassoImageView gifImageView; //Picasso 
+    private String gifIvGroup;
+    private double gifPriority; //gif的优先级
+    private String gifUrl; //gif的url
+    public PicassoImageView imageView;  //又来一个Picasso
+
+	 //构造函数
+    public GifImageView(Context context) {
+        this(context, null);
+    }
+
+    //构造函数
+    public GifImageView(Context context, AttributeSet attributeSet) {
+        this(context, attributeSet, 0);
+    }
+
+    //构造函数
+    public GifImageView(Context context, AttributeSet attributeSet, int i) {
+        super(context, attributeSet, i);
+        init(context);
+    }
+    
+    //初始化 *关键*
+    private void init(Context context) {
+        LayoutParams layoutParams = new FrameLayout.LayoutParams(-1, -1);
+        this.imageView = new PicassoImageView(context);
+        this.gifImageView = new PicassoImageView(context);
+        this.gifImageView.setFadeInDisplayEnabled(false);
+        addView(this.gifImageView, layoutParams);
+        addView(this.imageView, layoutParams);
+        //开始进行gif加载的设置
+        this.gifImageView.setOnLoadChangeListener(new u() {
+
+            //gif加载开始
+            public void onImageLoadStart() {
+                GifImageView.this.imageView.setVisibility(View.VISIBLE);
+            }
+  
+            //gif加载完成
+            public void onImageLoadSuccess(Bitmap bitmap) {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append(&quot;load gif success : &quot;);
+                stringBuilder.append(GifImageView.this.gifImageView.getURL());
+                b.a(GifImageView.class, stringBuilder.toString());
+                GifImageView.this.imageView.setVisibility(View.GONE);
+            }
+  
+            //加载失败如何处理
+            public void onImageLoadFailed() {
+                StringBuilder stringBuilder = new StringBuilder();
+                stringBuilder.append(&quot;load gif failed : &quot;);
+                stringBuilder.append(GifImageView.this.gifImageView.getURL());
+                b.a(GifImageView.class, stringBuilder.toString());
+                GifImageView.this.imageView.setVisibility(View.VISIBLE);
+            }
+        });
+    }
+    
+    //设置布局
+    public void setLayoutParams(LayoutParams layoutParams) {
+        super.setLayoutParams(layoutParams);
+        setViewParams(this.imageView, layoutParams);
+        setViewParams(this.gifImageView, layoutParams);
+    }
+
+
+    //设置布局
+    private void setViewParams(View view, LayoutParams layoutParams) {
+        LayoutParams layoutParams2 = view.getLayoutParams();
+        if (layoutParams2 instanceof FrameLayout.LayoutParams) {
+            layoutParams2.width = layoutParams.width;
+            layoutParams2.height = layoutParams.height;
+            view.setLayoutParams(layoutParams2);
+        }
+    }
+
+
+    //开始执行gif播放
+    public void startGif() {
+        if (this.gifImageView.isImageAnimating()) {
+            Log.d(TAG, &quot;gifIv has already been started: &quot;);
+        } else {
+            this.gifImageView.setAnimatedImageLooping(-1);
+            this.gifImageView.startImageAnimation();
+            Log.d(TAG, &quot;gifIv has been started: &quot;);
+        }
+    }
+
+    //停止执行gif播放
+    public void stopGif() {
+        if (this.gifImageView.isImageAnimating()) {
+            this.gifImageView.setAnimatedImageLooping(0);
+            this.gifImageView.stopImageAnimation();
+            Log.d(TAG, &quot;gifIv has been stoped: &quot;);
+        } else {
+            Log.d(TAG, &quot;gifIv has already been stoped: &quot;);
+        }
+    }
+
+    //设置image和gif图像地址
+    public void setGifImage(String str, String str2) {
+
+        this.imageView.setImage(str);
+        this.gifImageView.setAnimatedImageLooping(0);
+        this.gifImageView.setImage(str2);
+        this.imageView.setVisibility(0);
+        this.gifUrl = str2;
+        if (TextUtils.isEmpty(str2)) {
+            GifImageViewManager.getInstance().addGifIv(this);
+        } else {
+            GifImageViewManager.getInstance().removeGifIv(this);
+        }
+    }
+
+    public void setAnimatedImageLooping(int i) {
+        this.imageView.setAnimatedImageLooping(i);
+    }
+
+    public void setScaleType(ImageView.ScaleType scaleType) {
+        this.imageView.setScaleType(scaleType);
+        this.gifImageView.setScaleType(scaleType);
+    }
+
+    //支持直接设置drawable
+    public void setImageDrawable(Drawable drawable) {
+        this.imageView.setVisibility(0);
+        this.imageView.setImageDrawable(drawable);
+    }
+   
+   .....此处省略1000字
+}
+</code></pre>
+<p>另外，还发现它的自定义图片PicassoImageView（好像跟git上面的Picasso没什么关系）。</p>
+<pre><code>import com.dianping.imagemanager.DPImageView;
+public class PicassoImageView extends DPImageView implements Clippable {
+}
+
+
+public class DPImageView extends ImageView implements OnClickListener {
+}
+</code></pre>
+<p>还有。。。。咳咳，让我们点到为止吧。</p>
+<p>###点评效果总结<br>
+所以，点评的基本逻辑跟我之前说的第二种方案几乎无差，我们再来回顾一下：</p>
+<p>1.自定义View命名为PicassoImageView，可以展示Gif图也可以展示ImageView；</p>
+<p>2.封装GifImageView，里面包含两个PicassoImageView；</p>
+<p>3.其中一个PicassoImageView展示imageview占位，同时另外一个PicassoImageView进行gif的加载，加载完成后，把第一个PicassoImageView消失；</p>
+<p>so，感谢点评为我们提供宝贵的思路，接下来让我们去看看马蜂窝是怎么实现的吧。</p>
+<p>###马蜂窝效果深入研究<br>
+####dump之后依然没有有用信息<br>
+也不是完全没有用，至少你知道了程序的入口在哪里。<br>
+####看看logcat</p>
+<pre><code>2019-09-18 16:53:11.786 25404-25919/? D/SoLoader: About to load: libgifimage.so
+2019-09-18 16:53:11.787 25404-25919/? D/SoLoader: libgifimage.so not found on /data/data/com.mfw.roadbook/lib-main
+2019-09-18 16:53:11.787 25404-25919/? D/SoLoader: libgifimage.so found on /data/app/com.mfw.roadbook-U4eSwGYqvGPqtvkBe8R4gw==/lib/arm
+2019-09-18 16:53:11.787 25404-25919/? D/SoLoader: Not resolving dependencies for libgifimage.so
+2019-09-18 16:53:11.795 25404-25919/? D/SoLoader: Loaded: libgifimage.so
+</code></pre>
+<p>嗯，果然，看看还是有收获的。又Get到一个新知识，可以通过加载so（libgifimage.so）的方式，提升GifView加载速度。</p>
+<p>###马蜂窝效果总结</p>
+<p>在实际体验的过程中，我发现滑动到没有加载的图片时，马蜂窝会用一个加载的灰色占位图占位，然后去下载gif，它旁边的图片都展示出来了，gif还没有下载完，体验不是很好。这点可以借鉴一下大众点评的。</p>
+<p>由于马蜂窝也加壳了，脱壳其实是很开(fei)心(shen)的，有了点评的思路，我就没有特别深入的研究马蜂窝的内部实现，其实直接看效果也能看出个大概。</p>
+<p>##有没有开源的库呢？<br>
+我们并不想把点评或者马蜂窝的代码直接拷过来，毕竟人家没有开源，而且也不一定契合我们的风格。在git上找一个demo实现以下？<br>
+于是，我看到了这个android-gif-drawable，这个看起来还不错，7K的赞，Fork了1.6K，正合我意，来吧，研究一波。</p>
+<p>###API解读<br>
+android-gif-drawable是通过JNI来渲染帧的，比使用WebView或者Movie性能要好一些。</p>
+<p><strong>依赖</strong></p>
+<pre><code>dependencies {
+    implementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.19'
+}
+
+repositories {
+	mavenCentral()
+	maven { 
+		url &quot;https://oss.sonatype.org/content/repositories/snapshots&quot; }
+	}
+	dependencies {
+    i	mplementation 'pl.droidsonroids.gif:android-gif-drawable:1.2.+'
+	}
+
+&lt;dependency&gt;
+    &lt;groupId&gt;pl.droidsonroids.gif&lt;/groupId&gt;
+    &lt;artifactId&gt;android-gif-drawable&lt;/artifactId&gt;
+    &lt;version&gt;insert latest version here&lt;/version&gt;
+    &lt;type&gt;aar&lt;/type&gt;
+&lt;/dependency&gt;
+</code></pre>
+<p>基本使用：</p>
+<pre><code>//1. asset文件
+GifDrawable gifFromAssets = new GifDrawable( getAssets(), &quot;anim.gif&quot; );
+
+//2. resource (drawable or raw)
+GifDrawable gifFromResource = new GifDrawable( getResources(), R.drawable.anim );
+
+//3. byte array
+byte[] rawGifBytes = ...
+GifDrawable gifFromBytes = new GifDrawable( rawGifBytes );
+
+//4. FileDescriptor
+FileDescriptor fd = new RandomAccessFile( &quot;/path/anim.gif&quot;, &quot;r&quot; ).getFD();
+GifDrawable gifFromFd = new GifDrawable( fd );
+
+//5. file path
+GifDrawable gifFromPath = new GifDrawable( &quot;/path/anim.gif&quot; );
+
+//6. file
+File gifFile = new File(getFilesDir(),&quot;anim.gif&quot;);
+GifDrawable gifFromFile = new GifDrawable(gifFile);
+
+//7. AssetFileDescriptor
+AssetFileDescriptor afd = getAssets().openFd( &quot;anim.gif&quot; );
+GifDrawable gifFromAfd = new GifDrawable( afd );
+
+//8. InputStream (it must support marking)
+InputStream sourceIs = ...
+BufferedInputStream bis = new BufferedInputStream( sourceIs, GIF_LENGTH );
+GifDrawable gifFromStream = new GifDrawable( bis );
+
+//9. direct ByteBuffer
+ByteBuffer rawGifBytes = ...
+GifDrawable gifFromBytes = new GifDrawable( rawGifBytes );
+
+//10.加载网络图片其实本质上也离不开上面这些内容，推荐RxJava；
+</code></pre>
+<p>额外的API：</p>
+<pre><code>- 停止GIF动画
+·stop() 
+
+- 开始GIF动画
+·start() 
+
+- GIf动画是否在执行
+isRunning() 
+
+- 重置GIF动画
+reset() 
+
+- 控制执行动画的速度
+setSpeed(float factor) 
+
+- 从该动画的执行位置开始执行
+seekTo(int position) 
+
+- 动画的持续时间
+getDuration() 
+
+- 当前动画的播放时间
+getCurrentPosition() 
+</code></pre>
+<p>调用方法也是非常简单：</p>
+<pre><code>&lt;pl.droidsonroids.gif.GifImageView
+android:layout_width=&quot;match_parent&quot;
+android:layout_height=&quot;match_parent&quot;
+android:src=&quot;@drawable/src_anim&quot;
+android:background=&quot;@drawable/bg_anim&quot;
+/&gt;
+
+try {
+            GifDrawable gifFromResDrawable = new GifDrawable( mContext.getResources(), getIntGifRes(imageData.gifUrl));
+            viewHolder.gifImageView.setImageDrawable(gifFromResDrawable);
+            viewHolder.gifImageView.setVisibility(View.VISIBLE);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+</code></pre>
+<p>所以，我们看到，本质上还是这个GifDrawable在起作用，因为GifImageView继承的是ImageView。</p>
+<p>###效果如下</p>
+<!--todo-->
+<p>##撸一个Demo<br>
+我们看完了大众点评、马蜂窝、github上的实现效果。它们有自己的优点，结合58自己的技术特点，我打算采用的技术架构：FRESCO + RecyclerView的StaggeredGridLayoutManager，具体实现思路如下：</p>
+<p>###使用StaggeredGridLayoutManager实现瀑布布局；</p>
+<pre><code>RecyclerView recyclerView = (RecyclerView)findViewById(R.id.recycler_view);
+    StaggeredGridLayoutManager layoutManager = new StaggeredGridLayoutManager(2,
+            StaggeredGridLayoutManager.VERTICAL);
+    recyclerView.setLayoutManager(layoutManager);
+
+    FrescoAdapter adapter = new FrescoAdapter(this, DataUtils.getFrescoImageData());
+    recyclerView.setAdapter(adapter);
+</code></pre>
+<p>###自定义Adapter继承自RecyclerView.Adapter，用于加载图片和GIF：</p>
+<pre><code>static class ViewHolder extends RecyclerView.ViewHolder{
+
+    SimpleDraweeView draweeImage;
+    SimpleDraweeView draweeGif;
+    TextView textView;
+    public ViewHolder(@NonNull View itemView) {
+        super(itemView);
+        draweeImage = (SimpleDraweeView) itemView.findViewById(R.id.item_draweeview);
+        draweeGif = (SimpleDraweeView) itemView.findViewById(R.id.item_draweeview_gif);
+        textView = (TextView) itemView.findViewById(R.id.item_draweeview_text);
+    }
+}
+</code></pre>
+<p>###加载图片和GIF</p>
+<pre><code>/**
+     * Fresco 加载webp图片
+     * @param draweeView
+     * @param imageUrl
+     */
+    public static void loadWebpImage(final Context context, final SimpleDraweeView draweeView, final ImageData imageData, String imageUrl, final boolean reSize, final int position) {
+        DraweeController controller = Fresco.newDraweeControllerBuilder()
+                .setUri(Uri.parse(imageUrl))
+                .setAutoPlayAnimations(true)
+                .setOldController(draweeView.getController())
+                .setControllerListener(new ControllerListener&lt;ImageInfo&gt;() {
+                    @Override
+                    public void onSubmit(String id, Object callerContext) {
+
+                    }
+
+                    @Override
+                    public void onFinalImageSet(String id, @Nullable ImageInfo imageInfo, @Nullable Animatable animatable) {
+                        if (imageInfo == null) {
+                            return;
+                        }
+
+                        if(imageData.getScale() == 0){
+                            int width = imageInfo.getWidth();
+                            int height = imageInfo.getHeight();
+                            float scale = (float) width/ (float) height;
+                            imageData.setScale(scale);
+                        }
+                        final ViewGroup.LayoutParams layoutParams = draweeView.getLayoutParams();
+                        layoutParams.width = DisplayUtils.getScreenWidth((Activity) context) / 2 - DisplayUtils.dp2px(context,10);
+                        layoutParams.height = (int) (layoutParams.width/ imageData.getScale());
+
+                        imageData.setWidth(layoutParams.width);
+                        imageData.setHeight(layoutParams.height);
+
+                        imageData.setPosition(position);
+
+                        draweeView.setLayoutParams(layoutParams);
+
+                    }
+
+                    @Override
+                    public void onIntermediateImageSet(String id, @Nullable ImageInfo imageInfo) {
+
+                    }
+
+                    @Override
+                    public void onIntermediateImageFailed(String id, Throwable throwable) {
+
+                    }
+
+                    @Override
+                    public void onFailure(String id, Throwable throwable) {
+
+                    }
+
+                    @Override
+                    public void onRelease(String id) {
+
+                    }
+                })
+                .build();
+
+        draweeView.setController(controller);
+
+    }
+
+    /**
+     * Fresco 加载webpGID
+     * @param imageView
+     * @param imageUrl
+     */
+    public static void loadWebpGif(final Context context, final SimpleDraweeView imageView,final SimpleDraweeView gifView, final ImageData imageData, String imageUrl, final boolean reSize, final int position) {
+        DraweeController controller = Fresco.newDraweeControllerBuilder()
+
+                .setUri(Uri.parse(imageUrl))
+
+                .setAutoPlayAnimations(true)
+
+                .setOldController(gifView.getController())
+
+                .setControllerListener(new ControllerListener&lt;ImageInfo&gt;() {
+                    @Override
+                    public void onSubmit(String id, Object callerContext) {
+
+                    }
+
+                    @Override
+                    public void onFinalImageSet(String id, @Nullable ImageInfo imageInfo, @Nullable Animatable animatable) {
+                        if (imageInfo == null) {
+                            return;
+                        }
+                        final ViewGroup.LayoutParams layoutParams = imageView.getLayoutParams();
+                        final ViewGroup.LayoutParams gifLayoutParams = gifView.getLayoutParams();
+                        gifLayoutParams.width = layoutParams.width;
+                        gifLayoutParams.height = layoutParams.height;
+
+                        gifView.setLayoutParams(gifLayoutParams);
+
+                    }
+
+                    @Override
+                    public void onIntermediateImageSet(String id, @Nullable ImageInfo imageInfo) {
+
+                    }
+
+                    @Override
+                    public void onIntermediateImageFailed(String id, Throwable throwable) {
+
+                    }
+
+                    @Override
+                    public void onFailure(String id, Throwable throwable) {
+
+                    }
+
+                    @Override
+                    public void onRelease(String id) {
+
+                    }
+                })
+                .build();
+
+        gifView.setController(controller);
+    }
+</code></pre>
+<p>###效果如下：</p>
+<!--todo-->
+<p>###缺点与不足<br>
+Demo里面还有很多的异常边界情况没有考虑，比如各类的容错判断，性能问题监控，等等</p>
+<p>传送门：<a href="https://github.com/Mozziehh/GifView">github.com/mozzie</a></p>
+<p>##参考文章</p>
+<ol>
+<li>
+<p>https://www.jianshu.com/p/057f48df855b</p>
+</li>
+<li>
+<p>https://github.com/koral--/android-gif-drawable</p>
+</li>
+<li>
+<p>https://www.dev2qa.com/how-to-play-gif-file-use-android-graphics-movie-class/</p>
+</li>
+<li>
+<p>https://blog.csdn.net/feather_wch/article/details/79558240</p>
+</li>
+</ol>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[通过NDK实现Zxing二维码扫描放大功能]]></title>
         <id>https://Mozziehh.github.io/post/tong-guo-ndk-shi-xian-zxing-er-wei-ma-sao-miao-fang-da-gong-neng</id>
