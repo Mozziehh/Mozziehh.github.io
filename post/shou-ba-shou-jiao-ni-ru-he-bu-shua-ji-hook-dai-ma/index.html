@@ -1,0 +1,217 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>手把手教你如何不刷机Hook代码 | 差不多胡先生</title>
+<meta name="description" content="书山有路勤为径，学海无涯苦作舟" />
+<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1574383258176">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://Mozziehh.github.io/styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://Mozziehh.github.io">
+  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1574383258176" alt="">
+  </a>
+  <h1 class="site-title">
+    差不多胡先生
+  </h1>
+  <p class="site-description">
+    书山有路勤为径，学海无涯苦作舟
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              手把手教你如何不刷机Hook代码
+            </h2>
+            <div class="post-info">
+              <span>
+                2019-11-22
+              </span>
+              <span>
+                7 min read
+              </span>
+              
+                <a href="https://Mozziehh.github.io/tag/Tv-Y4ziFO" class="post-tag">
+                  # 反编译
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <p>##1. 背景</p>
+<blockquote>
+<p>前几个月，我们同TEG的同学一起排查一个问题：B端用户使用黑产提供的软件来Hook我们的API，达到在发送IM消息时发送自定义消息的目的，比如：在tips里面弹出，“淘宝客服，日结300，加V xxxxxxx”</p>
+</blockquote>
+<blockquote>
+<p>带着一颗强烈的好奇心，我走进了Xposed的世界，发现原来Android的世界还可以如此精彩。</p>
+</blockquote>
+<p>##2. Xposed-从入门到放弃<br>
+提起Xposed，可能很多人都听过它的名字，知道它是什么。</p>
+<p>但是具体再深挖一下，它的原理是什么，可能大家就会回答的很模糊。</p>
+<p>如果再深挖一下，const u2* insns是干什么用的？</p>
+<p>如何再涉及到实践，如何Hook一个私有方法？</p>
+<p>相信大家心里就会说：“这跟我有什么关系~~”</p>
+<p>对的，一开始我也是这样的。但是一步步走下来，你会发现这个东西根本没那么难。那么，就跟我一起来学习下这块的相关知识吧。</p>
+<p>###2.1 什么是Xpose？<br>
+Xposed 框架是一款可以在不修改 APK 的情况下影响程序运行(修改系统)的框架服务，基于它可以制作出许多功能强大的模块，且在功能不冲突的情况下同时运作，在这个框架下，我们可以加载很多插件 App ，这些插件 App 可以直接或间接劫持、篡改、伪造一些信息。</p>
+<p>###2.2 它的原理是什么？</p>
+<p>####2.2.1 Xposed资源<br>
+·XposedBridge.jar：XposedBridge.jar是Xposed提供的jar文件，负责在Native层与FrameWork层进行交互。/system/bin/app_process进程启动过程中会加载该jar包，其它的Modules的开发与运行都是基于该jar包的。</p>
+<p>·Xposed：Xposed的C++部分，主要是用来替换/system/bin/app_process，并为XposedBridge提供JNI方法。</p>
+<p>·XposedInstaller：Xposed的安装包，负责配置Xposed工作的环境并且提供对基于Xposed框架的Modules的管理。</p>
+<p>·XposedMods：使用Xposed开发的一些Modules，其中AppSettings是一个可以进行权限动态管理的应用</p>
+<p>####2.2.2 Zygote<br>
+在Android系统中，应用程序进程都是由Zygote进程孵化出来的，而Zygote进程是由Init进程启动的。Zygote进程在启动时会创建一个Dalvik虚拟机实例，每当它孵化一个新的应用程序进程时，都会将这个Dalvik虚拟机实例复制到新的应用程序进程里面去，从而使得每一个应用程序进程都有一个独立的Dalvik虚拟机实例。这也是Xposed选择替换app_process的原因。</p>
+<p>Zygote进程在启动的过程中，除了会创建一个Dalvik虚拟机实例之外，还会将Java运行时库加载到进程中来，以及注册一些Android核心类的JNI方法来前面创建的Dalvik虚拟机实例中去。注意，一个应用程序进程被Zygote进程孵化出来的时候，不仅会获得Zygote进程中的Dalvik虚拟机实例拷贝，还会与Zygote一起共享Java运行时库。这也就是可以将XposedBridge这个jar包加载到每一个Android应用程序中的原因。XposedBridge有一个私有的Native（JNI）方法hookMethodNative，这个方法也在app_process中使用。这个函数提供一个方法对象利用Java的Reflection机制来对内置方法覆写。</p>
+<p>####2.2.3 Hook<br>
+在Android系统启动的时候，zygote进程加载XposedBridge将所有需要替换的Method通过JNI方法hookMethodNative指向Native方法xposedCallHandler，xposedCallHandler在转入handleHookedMethod这个Java方法执行用户规定的Hook Func。</p>
+<p>XposedBridge这个jar包含有一个私有的本地方法：hookMethodNative，该方法在附加的app_process程序中也得到了实现。它将一个方法对象作为输入参数（你可以使用Java的反射机制来获取这个方法）并且改变Dalvik虚拟机中对于该方法的定义。它将该方法的类型改变为native并且将这个方法的实现链接到它的本地的通用类的方法。换言之，当调用那个被hook的方法时候，通用的类方法会被调用而不会对调用者有任何的影响。在hookMethodNative的实现中，会调用XposedBridge中的handleHookedMethod这个方法来传递参数。handleHookedMethod这个方法类似于一个统一调度的Dispatch例程，其对应的底层的C++函数是xposedCallHandler。而handleHookedMethod实现里面会根据一个全局结构hookedMethodCallbacks来选择相应的hook函数，并调用他们的before, after函数。</p>
+<p>当多模块同时Hook一个方法的时候，Xposed会自动根据Module的优先级来排序，调用顺序如下：</p>
+<p>A.before -&gt; B.before -&gt; original method -&gt; B.after -&gt; A.after</p>
+<p>###2.3 为什么后来又放弃了？<br>
+研究了一段时间之后，寻思就开始上手吧。<br>
+####2.3.1 刷机成本<br>
+Xposed是需要root手机的，于是就开始研究刷机，我手里有两个锤子手机，其中一个呢，已经被我彻底刷成了“锤子”，平时砸个核桃啥的用起来还算是顺手。另外一个，刷完之后，我手机里面的东西还都需要重新安装，有些APK是市场上已经找不到了。而且，我们目前使用的手机，主流的小米、OPPO、VIVI、华为，这些手机的刷机方式已经不再像原来那样简单，下载一个安装包，同时按住电源键+ Home + 音量“+”等一会那么简单了。而且刷完之后，不是NFC不好用，就是WIFI坏了。要是没有一款可要可不要的闲置手机，真的不建议刷。<br>
+####2.3.2 脱壳也是一件麻烦事<br>
+接下来再想，我们突破了种种困难，完成了刷机。但是当我们需要Hook方法的时候又会犯难，因为现在加壳的APK，反编译之后外面就一两个类，根本无从下手，还需要再研究脱壳。</p>
+<p>渐渐地，我就发现原本我的目标：想看看如何模拟黑产去Hook一个API，但是这样的路让我越走越远。方向没错，但是不禁觉得这是在浪费时间。难道就真的没有办法了么？</p>
+<p>接下来就来介绍一下，今天的猪脚，Virtual Xposed~~<br>
+##3. Virutal Xposed<br>
+对于我这样的“刚需”，它是一款神器。为什么，首先它不需要刷机，它的脱壳也是非常的简单。就这么简单的两点，完全解决了我的痛点。<br>
+###3.1 它与Xposed从原理上的区别<br>
+VirtualXposed 并未对系统底层进行任何修改，也没有利用什么神奇的漏洞。它的工作原理有点像那些双开软件。</p>
+<p>VirtualXposed 是通过在你的手机里创建一个「虚拟环境」，然后在此虚拟环境中启用 Xposed。</p>
+<p>###3.2 FDex2</p>
+<p>###3.3 Demo<br>
+##偷偷搞一波58试试</p>
+<p>参考文章：<br>
+http://yx.bsh.me/23278.html<br>
+https://mp.weixin.qq.com/s/PG7ykzTWkw4tARjp0yKeAQ<br>
+https://mp.weixin.qq.com/s/AlZMhMZ-SFOxRMtXfcev1g<br>
+https://blog.csdn.net/ascii2/article/details/47974217<br>
+https://blog.csdn.net/wxyyxc1992/article/details/17320911</p>
+
+              </div>
+              <div class="toc-container">
+                
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://Mozziehh.github.io/post/flutter-jie-ru-di-san-fang-sdk">
+              <h3 class="post-title">
+                Flutter接入第三方SDK
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://Mozziehh.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+  // This should probably be throttled.
+  // Especially because it triggers during smooth scrolling.
+  // https://lodash.com/docs/4.17.10#throttle
+  // You could do like...
+  // window.addEventListener("scroll", () => {
+  //    _.throttle(doThatStuff, 100);
+  // });
+  // Only not doing it here to keep this Pen dependency-free.
+
+  window.addEventListener("scroll", event => {
+    let fromTop = window.scrollY;
+
+    mainNavLinks.forEach((link, index) => {
+      let section = document.getElementById(decodeURI(link.hash).substring(1));
+      let nextSection = null
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add("current");
+          } else {
+            link.classList.remove("current");    
+          }
+        } else {
+          link.classList.add("current");
+        }
+      } else {
+        link.classList.remove("current");
+      }
+    });
+  });
+
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
