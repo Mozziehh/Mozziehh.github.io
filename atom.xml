@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://Mozziehh.github.io</id>
     <title>差不多胡先生</title>
-    <updated>2019-12-01T03:42:25.317Z</updated>
+    <updated>2019-12-05T07:32:23.126Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://Mozziehh.github.io"/>
     <link rel="self" href="https://Mozziehh.github.io/atom.xml"/>
@@ -10,6 +10,382 @@
     <logo>https://Mozziehh.github.io/images/avatar.png</logo>
     <icon>https://Mozziehh.github.io/favicon.ico</icon>
     <rights>All rights reserved 2019, 差不多胡先生</rights>
+    <entry>
+        <title type="html"><![CDATA[Android源码阅读系列之-Handler]]></title>
+        <id>https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-handler</id>
+        <link href="https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-handler">
+        </link>
+        <updated>2019-12-05T07:18:07.000Z</updated>
+        <content type="html"><![CDATA[<p>##概述<br>
+工作中，我们经常遇到多线程用来处理耗时任务，因为主线程中操作很容易引起ANR。于是在Android中使用Handler进行异步的消息处理，处理完成后将再返回给UI线程执行后续逻辑。</p>
+<p>##带着问题去看文章</p>
+<p>Q1：子线程可以更新UI么，为什么？</p>
+<p>Q2：一个Thread可以有几个Looper？几个Handler？</p>
+<p>Q3：可以在子线程直接new一个Handler吗？该怎么做？</p>
+<p>Q4：Message的创建方法有几种？哪种效果更好，为什么？</p>
+<p>Q5：主线程中Looper的轮询死循环为何没有阻塞主线程？</p>
+<p>Q6：使用Hanlder的postDealy()后消息队列会发生什么变化？</p>
+<p>Q7：点击页面上的按钮后更新TextView的内容，谈谈你的理解？</p>
+<p>Q8：Handler是如何完成子线程和主线程通信的？</p>
+<p>Q9：关于ThreadLocal，谈谈你的理解？</p>
+<p>Q10：生产者-消费者设计模式？</p>
+<p>Q11：享元设计模式？</p>
+<p>Q12：Thread两次调用start()方法会发生问题么？</p>
+<p>Q13：开启三个线程，循环打印出1到100；<br>
+T1：1,4,7....  T2:2,5,8.....  T3:3,6,9....</p>
+<p>上述这十三个问题，如果你能清晰透彻的了解，那么你大可关闭这篇文章~</p>
+<p>##常见用法</p>
+<pre><code>//处理
+private Handler mHandler = new Handler() {
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+                case MESSAGE_TEXT_VIEW:
+                    mTextView.setText(&quot;UI成功更新&quot;);
+                default:
+                    super.handleMessage(msg);
+            }
+        }
+};
+
+//调用
+new Thread(new Runnable() {
+            @Override
+            public void run() {
+				mHandler.obtainMessage(MESSAGE_TEXT_VIEW).sendToTarget();
+            }
+        }).start();
+</code></pre>
+<p>##Handler的构造方法<br>
+我们先来剖析一下Handler的构造方法：</p>
+<pre><code>public Handler(Callback callback, boolean async) {
+    if (FIND_POTENTIAL_LEAKS) {
+        final Class klass = getClass();
+        if ((klass.isAnonymousClass() || klass.isMemberClass() || klass.isLocalClass()) &amp;&amp;
+                (klass.getModifiers() &amp; Modifier.STATIC) == 0) {
+            Log.w(TAG, &quot;The following Handler class should be static or leaks might occur: &quot; +
+                klass.getCanonicalName());
+        }
+    }
+
+    mLooper = Looper.myLooper();
+    if (mLooper == null) {
+        throw new RuntimeException(
+            &quot;Can't create handler inside thread that has not called Looper.prepare()&quot;);
+    }
+    mQueue = mLooper.mQueue;
+    mCallback = callback;
+    mAsynchronous = async;
+}
+</code></pre>
+<p>在构造方法里面，我们看到通过Looper.myLooper()去获取当前Hander的looper，发现获取不到，于是触发异常：&quot;Can't create handler inside thread that has not called Looper.prepare()&quot;，它的意思就是不能在没有得到looper的情况下，就使用handler。但是，我们发现在实际的使用过程中，我们并没有调用Looper.prepare()方法，也没有事，其实是主线程已经帮我们调用，让我们看一下如下的代码：</p>
+<p>在ActivityThread中的main方法，它主要做了两个事情：一个准备mainLooper，一个是通过loop()方法创建一个looper：</p>
+<pre><code>public static void main(String[] args) {
+    ...
+
+    Looper.prepareMainLooper();
+
+    ...
+    Looper.loop();
+
+    throw new RuntimeException(&quot;Main thread loop unexpectedly exited&quot;);
+}
+</code></pre>
+<p>在得到looper之后，又通过looper获取了消息队列，这个消息队列其实是一个消息链表，它里面存储的就是Message，即消息。</p>
+<p>然后我们再来看一下这个Looper.prepareMainLooper（）</p>
+<pre><code>public static void prepareMainLooper() {
+    prepare(false);
+    synchronized (Looper.class) {
+        if (sMainLooper != null) {
+            throw new IllegalStateException(&quot;The main Looper has already been prepared.&quot;);
+        }
+        sMainLooper = myLooper();
+    }
+}
+</code></pre>
+<p>所以说，ActivityThread在启动的过程中就创建了looper和messageQueue。</p>
+<p>##Looper<br>
+接下来，我们看一下Looper.prepare()方法里面都做了什么？</p>
+<pre><code>static final ThreadLocal sThreadLocal = new ThreadLocal();
+
+public static @Nullable Looper myLooper() {
+    return sThreadLocal.get();
+}
+</code></pre>
+<p>我们看到，它是在ThreadLocal中存储了对应的Looper对象；我们看到ThreadLocal是被static和final同时修饰，所以，它是不可以被继承的并且全局静态的。所以，它只存在一份。</p>
+<pre><code>private static void prepare(boolean quitAllowed) {
+    if (sThreadLocal.get() != null) {
+        throw new RuntimeException(&quot;Only one Looper may be created per thread&quot;);
+    }
+    sThreadLocal.set(new Looper(quitAllowed));
+}
+</code></pre>
+<p>所以，这里我们看到，当我们多次调用prepare的时候，就会报错：&quot;Only one Looper may be created per thread&quot;	，意思是：每一个线程有且只有一个Looper。</p>
+<p>那么，这个Looper里面都有什么呢？</p>
+<pre><code>private Looper(boolean quitAllowed) {
+    mQueue = new MessageQueue(quitAllowed);
+    mThread = Thread.currentThread();
+}
+</code></pre>
+<p>首先Looper会定义一个消息链表，然后获取Handler当前的线程。<br>
+Looper的最主要作用：开启消息循环机制，不断从MessageQueue里面获取Message，然后调用msg.target.dispatchMessage将消息分发出去。</p>
+<p>接下来，我们去看一下Loop()方法：</p>
+<pre><code>public static void loop() {
+    final Looper me = myLooper();
+    if (me == null) {
+        throw new RuntimeException(&quot;No Looper; Looper.prepare() wasn't called on this thread.&quot;);
+    }
+    final MessageQueue queue = me.mQueue;
+
+    // Make sure the identity of this thread is that of the local process,
+    // and keep track of what that identity token actually is.
+    Binder.clearCallingIdentity();
+    final long ident = Binder.clearCallingIdentity();
+    
+    //无限循环，这里可以思考一下，为什么不会阻塞主线程
+    for (;;) {
+        Message msg = queue.next(); // might block
+        if (msg == null) {
+            // No message indicates that the message queue is quitting.
+            return;
+        }
+
+        // This must be in a local variable, in case a UI event sets the logger
+        Printer logging = me.mLogging;
+        if (logging != null) {
+            logging.println(&quot;&gt;&gt;&gt;&gt;&gt; Dispatching to &quot; + msg.target + &quot; &quot; +
+                    msg.callback + &quot;: &quot; + msg.what);
+        }
+
+        msg.target.dispatchMessage(msg);
+
+        if (logging != null) {
+            logging.println(&quot;&lt;&lt;&lt;&lt;&lt; Finished to &quot; + msg.target + &quot; &quot; + msg.callback);
+        }
+
+        // Make sure that during the course of dispatching the
+        // identity of the thread wasn't corrupted.
+        final long newIdent = Binder.clearCallingIdentity();
+        if (ident != newIdent) {
+            Log.wtf(TAG, &quot;Thread identity changed from 0x&quot;+ Long.toHexString(ident) + &quot; to 0x&quot;+ Long.toHexString(newIdent) + &quot; while dispatching to &quot;+ msg.target.getClass().getName() + &quot; &quot;+ msg.callback + &quot; what=&quot; + msg.what);
+        }
+
+        msg.recycleUnchecked();
+    }
+}
+</code></pre>
+<p>#消息的发送<br>
+发送消息，我们调用的是obtainMessage，然后sendtoTarget();在obtainMessage中我们获取的是Message.obtain()方法：</p>
+<pre><code>public static Message obtain() {
+        synchronized (sPoolSync) {
+            if (sPool != null) {
+                Message m = sPool;
+                sPool = m.next;
+                m.next = null;
+                m.flags = 0; // clear in-use flag
+                sPoolSize--;
+                return m;
+            }
+        }
+        return new Message();
+    }
+</code></pre>
+<p>这是一个静态的方法，使用了同步锁，获取消息，同时把自己清空掉，放在链表头；然后，sendToTarget负责发送消息，最终调用的是sendMessageAtTime(Message msg, long uptimeMillis)</p>
+<pre><code>public boolean sendMessageAtTime(Message msg, long uptimeMillis) {
+    MessageQueue queue = mQueue;
+    if (queue == null) {
+        RuntimeException e = new RuntimeException(
+                this + &quot; sendMessageAtTime() called with no mQueue&quot;);
+        Log.w(&quot;Looper&quot;, e.getMessage(), e);
+        return false;
+    }
+    return enqueueMessage(queue, msg, uptimeMillis);
+}
+
+private boolean enqueueMessage(MessageQueue queue, Message msg, long uptimeMillis) {
+    msg.target = this;
+    if (mAsynchronous) {
+        msg.setAsynchronous(true);
+    }
+    return queue.enqueueMessage(msg, uptimeMillis);
+}
+</code></pre>
+<p>首先，获取消息链表，然后把消息入链表。</p>
+<p>##消息的处理</p>
+<p>刚才我们说过，我们调用的是msg.target.dispatchMessage，这个msg.target获取的就是handler。然后我们来看一下dispatchMessage都做了什么？</p>
+<pre><code>public void dispatchMessage(Message msg) {
+        if (msg.callback != null) {
+            handleCallback(msg);
+        } else {
+            if (mCallback != null) {
+                if (mCallback.handleMessage(msg)) {
+                    return;
+                }
+            }
+            handleMessage(msg);
+        }
+    }
+</code></pre>
+<p>这个时候我们可以看到，当我们没有给Message设置callback或者没有设置全局的callback的时候，它会默认的调用handleMessage(msg);这个时候，我们自己的handler就接收到了这个handleMessage。</p>
+<p>##问题回顾</p>
+<p>###子线程可以更新UI么，为什么？<br>
+子线程更新UI要分两种情况，一种是在onCreate里面，一种是在onResume里面。onCreate里面调用没事（如果不sleep()的话），在onResume里面调用就会发生异常：&quot;Only the original thread that created a view hierarchy can touch its views.&quot;，根本原因是在Activity初始化的时候，使用WindowManagerGlobal的addView方法，构造出ViewRootImpl，然后使用ViewRootImpl来判断是否在子线程中，而它的创建是在onResume方法里面进行回调的。</p>
+<p>###一个Thread可以有几个Looper？几个Handler？<br>
+一个Looper，因为调用Looper.prepare()会得到一个looper，多次调用会报错。一个Thread里面可以有多个Handler，通过msg.target进行关联。</p>
+<p>###可以在子线程直接new一个Handler吗？该怎么做？<br>
+我们正常是不会调用Looper.prepare()方法的，是主线程帮我们调用的。但是假如我们在Thread里面创建了一个Handler的时候，你会发现这个Handler直接在构造函数的时候就会报错。所以解决办法是：在new Handler之前，手动给它创建一个looper，也就是Looper.prepare()；</p>
+<p>###Message的创建方法有几种？哪种效果更好，为什么？<br>
+三种，new Message(), Message.obtain(), mHandler.obtainMessage()<br>
+第一种就是直接创建，后两种是从消息链表里面取Message，使用了享元模式。</p>
+<pre><code>public static Message obtain() {
+        synchronized (sPoolSync) {
+            if (sPool != null) {
+                Message m = sPool;
+                sPool = m.next;
+                m.next = null;
+                m.flags = 0; // clear in-use flag
+                sPoolSize--;
+                return m;
+            }
+        }
+        return new Message();
+    }
+</code></pre>
+<p>###主线程中Looper的轮询死循环为何没有阻塞主线程？<br>
+android的UI线程本质上就是一个轮训机制，你可以理解如果没有这个循环，那么将无法监听用户的时间，无法响应UI。</p>
+<p>###使用Hanlder的postDealy()后消息队列会发生什么变化？假如这个时候再来一条延迟消息Handler应该怎么处理？</p>
+<p>MessageQueue里面调用nativePollOnce方法来停止阻塞线程，阻塞的时间根据msg.when与now的差值来计算应该阻塞多长时间，如果再来一条非延迟消息，会将当前时间清空，直接执行，如果再来一条延迟消息，会计算当前时间与上一个时间比较，然后执行短的那个。</p>
+<pre><code>int nextPollTimeoutMillis = 0;
+for(;;) {
+    if (nextPollTimeoutMillis != 0) {
+        Binder.flushPendingCommands();
+    }
+ 
+    nativePollOnce(ptr, nextPollTimeoutMillis);
+ 
+    synchronized (this) {
+        // Try to retrieve the next message.  Return if found.
+        final long now = SystemClock.uptimeMillis();
+        Message prevMsg = null;
+        Message msg = mMessages;
+        if (msg != null &amp;&amp; msg.target == null) {
+            // Stalled by a barrier.  Find the next asynchronous message in the queue.
+            do {
+                prevMsg = msg;
+                msg = msg.next;
+            } while (msg != null &amp;&amp; !msg.isAsynchronous());
+        }
+        if (msg != null) {
+            if (now &lt; msg.when) {
+                // Next message is not ready.  Set a timeout to wake up when it is ready.
+                nextPollTimeoutMillis = (int) Math.min(msg.when - now, Integer.MAX_VALUE);
+            } else {
+                // Got a message.
+                mBlocked = false;
+                if (prevMsg != null) {
+                    prevMsg.next = msg.next;
+                } else {
+                    mMessages = msg.next;
+                }
+                msg.next = null;
+                if (DEBUG) Log.v(TAG, &quot;Returning message: &quot; + msg);
+                msg.markInUse();
+                return msg;
+            }
+        } else {
+            // No more messages.
+            nextPollTimeoutMillis = -1;
+        }
+        ...
+    }
+    nextPollTimeoutMillis = 0;
+</code></pre>
+<p>###点击页面上的按钮后更新TextView的内容，谈谈你的理解？</p>
+<p>###Handler是如何完成子线程和主线程通信的？<br>
+见消息的处理</p>
+<p>###关于ThreadLocal，谈谈你的理解？</p>
+<p>static final ThreadLocal<Looper> sThreadLocal = new ThreadLocal<Looper>();</p>
+<p>Thread相当于是简单了实现了一个HashMap，key对应的是每一个线程，value对应它的looper。为啥不用HashMap？因为HashMap里面有很多功能是不需要的，所以单独实现了一个。</p>
+<p>###生产者-消费者设计模式？<br>
+一个用于生产，一个用于消费，生产者将事件丢进缓冲区，缓冲区满则不继续生产，消费者去消费缓冲区的事件，如果缓冲区空就不消费，并且会通知生产者去生产，同时，生产者生产完成后，要通知消费者去消费。</p>
+<p>###Thread两次调用start()方法会发生问题么？</p>
+<p>线程首先会运行一次，然后抛出java.lang.IllegalThreadStateException<br>
+异常。</p>
+<pre><code>if (threadStatus != 0 || started)
+            throw new IllegalThreadStateException();
+</code></pre>
+<p>###使用三个线程顺序打印1到100<br>
+使用wait和notifyAll，然后利用同步锁volatile将loackNum加锁，利用synchronized对object加锁，实现同步。</p>
+<pre><code>static volatile int loackNum = 1;
+static Object object = new Object();
+public static void main(String args[]){
+    final Thread thread1 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            synchronized (object){
+                while (loackNum &lt;= 100) {
+                    if (loackNum % 3 == 1) {
+                        System.out.println(Thread.currentThread().getName() + &quot;:&quot; + loackNum++);
+                    }
+                    object.notifyAll();
+                    try {
+                        object.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+
+        }
+    });
+    Thread thread2 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            synchronized (object){
+                while (loackNum &lt;= 100) {
+                    if (loackNum % 3 == 2) {
+                        System.out.println(Thread.currentThread().getName() + &quot;:&quot; + loackNum++);
+                    }
+                    object.notifyAll();
+                    try {
+                        object.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    });
+    Thread thread3 = new Thread(new Runnable() {
+        @Override
+        public void run() {
+            synchronized (object){
+                while (loackNum &lt;= 100) {
+                    if (loackNum % 3 == 0) {
+                        System.out.println(Thread.currentThread().getName() + &quot;:&quot; + loackNum++);
+                    }
+                    object.notifyAll();
+                    try {
+                        object.wait();
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                }
+            }
+        }
+    });
+    thread1.start();
+    thread2.start();
+    thread3.start();
+}
+</code></pre>
+<p>#总结<br>
+Handler负责发送消息和处理消息，Message就是那个消息，通过obtain方法获取消息队列，使用sendMessage将消息入队列。最终通过Looper.loop()方法中的无限循环去dispatchMessage回调到Handler里面。</p>
+<p>参考：</p>
+<p>https://juejin.im/entry/5708b3c38ac247004c1deef7</p>
+<p>https://blog.csdn.net/songzi1228/article/details/82835982</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[GifView在android的应用指南]]></title>
         <id>https://Mozziehh.github.io/post/gifview-zai-android-de-ying-yong-zhi-nan</id>
