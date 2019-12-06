@@ -1,0 +1,250 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Java知识体系之-泛型与泛型擦除 | 差不多胡先生</title>
+<meta name="description" content="书山有路勤为径，学海无涯苦作舟" />
+<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1575612055801">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://Mozziehh.github.io/styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://Mozziehh.github.io">
+  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1575612055801" alt="">
+  </a>
+  <h1 class="site-title">
+    差不多胡先生
+  </h1>
+  <p class="site-description">
+    书山有路勤为径，学海无涯苦作舟
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Java知识体系之-泛型与泛型擦除
+            </h2>
+            <div class="post-info">
+              <span>
+                2019-12-06
+              </span>
+              <span>
+                3 min read
+              </span>
+              
+                <a href="https://Mozziehh.github.io/tag/HJM1ZTj1o" class="post-tag">
+                  # 泛型
+                </a>
+              
+                <a href="https://Mozziehh.github.io/tag/sZIUebvmn" class="post-tag">
+                  # Java
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <p>#Java泛型与进阶<br>
+##什么是泛型<br>
+泛型是Java中一种常用的用于解决编译期间的类型转换异常的方式，防止在运行期间出现classCastException。</p>
+<p>代码如下：</p>
+<pre><code>public class GlmapperGeneric&lt;T&gt; {
+		private T t;
+    public void set(T t) { this.t = t; }
+    public T get() { return t; }
+  
+    public static void main(String[] args) {
+        // do nothing
+    }
+
+  /**
+    * 不指定类型
+    */
+  public void noSpecifyType(){
+    GlmapperGeneric glmapperGeneric = new GlmapperGeneric();
+    glmapperGeneric.set(&quot;test&quot;);
+    // 需要强制类型转换
+    String test = (String) glmapperGeneric.get();
+    System.out.println(test);
+  }
+
+  /**
+    * 指定类型
+    */
+  public void specifyType(){
+    GlmapperGeneric&lt;String&gt; glmapperGeneric = new GlmapperGeneric();
+    glmapperGeneric.set(&quot;test&quot;);
+    // 不需要强制类型转换
+    String test = glmapperGeneric.get();
+    System.out.println(test);
+  }
+}
+</code></pre>
+<p>##泛型中的通配符<br>
+在泛型中，通常使用的通配符有如下几种：T，E，K，V ？ ，这些符号你可以自己指定，但是为了更好的理解，我们通常使用上述作为默认规则。<br>
+T：代表指定的Java类型；<br>
+E：代表Element；<br>
+K和V：用于在Map中存储的key-value；<br>
+？：代表不确定的Java类型；</p>
+<p>###？通配符<br>
+我们先来看一个例子：List&lt;? extend Animals&gt; list = new List();<br>
+此时，它表示的意思就是我们的这个list可以传递的就是继承了Animals的子类；</p>
+<p>###上届通配符<br>
+所谓的上届通配符就是&lt; ? extends E&gt;，代表的意思是传递任意一个E本身或者E的子类都OK。<br>
+###下届通配符<br>
+所谓的下届通配符就是&lt; ? super E&gt;，代表的意思是传递任意一个是E本身或者E的父类都OK。</p>
+<pre><code>private &lt;T&gt; void test(List&lt;? super T&gt; dst, List&lt;T&gt; src){
+    for (T t : src) {
+        dst.add(t);
+    }
+}
+
+public static void main(String[] args) {
+    List&lt;Dog&gt; dogs = new ArrayList&lt;&gt;();
+    List&lt;Animal&gt; animals = new ArrayList&lt;&gt;();
+    new Test3().test(animals,dogs);
+}
+// Dog 是 Animal 的子类
+class Dog extends Animal {
+
+}
+</code></pre>
+<p>###？和T的区别<br>
+从字面的意思上来看：？代表的是非指定的任意Java类，T代表的是指定的Java类，T只可以继承某个类，而？可以标识父类或者子类：? extend A , ? super A。</p>
+<p>##泛型擦除</p>
+<pre><code>// 指定泛型为String
+
+List&lt;String&gt; list1 = new ArrayList&lt;&gt;();
+// 指定泛型为Integer
+List&lt;Integer&gt; list2 = new ArrayList&lt;&gt;();
+
+System.out.println(list1.getClass() == list2.getClass()); // true
+</code></pre>
+<p>在编译时，对于这些已经指定过的泛型，编译器会将它们都清除掉，这样的操作我们叫做泛型擦除。<br>
+规则：如果我们给泛型指定了上届，那么在擦除之后，它会指定到上届。否则，它将指定到Object。</p>
+<p>##参考地址</p>
+<p>https://juejin.im/post/5d5789d26fb9a06ad0056bd9</p>
+<p>https://juejin.im/post/5ceba1a2f265da1b95703558</p>
+
+              </div>
+              <div class="toc-container">
+                
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-xian-cheng-chi-zhuan">
+              <h3 class="post-title">
+                Android源码阅读系列之-线程池[转]
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://Mozziehh.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+  // This should probably be throttled.
+  // Especially because it triggers during smooth scrolling.
+  // https://lodash.com/docs/4.17.10#throttle
+  // You could do like...
+  // window.addEventListener("scroll", () => {
+  //    _.throttle(doThatStuff, 100);
+  // });
+  // Only not doing it here to keep this Pen dependency-free.
+
+  window.addEventListener("scroll", event => {
+    let fromTop = window.scrollY;
+
+    mainNavLinks.forEach((link, index) => {
+      let section = document.getElementById(decodeURI(link.hash).substring(1));
+      let nextSection = null
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add("current");
+          } else {
+            link.classList.remove("current");    
+          }
+        } else {
+          link.classList.add("current");
+        }
+      } else {
+        link.classList.remove("current");
+      }
+    });
+  });
+
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
