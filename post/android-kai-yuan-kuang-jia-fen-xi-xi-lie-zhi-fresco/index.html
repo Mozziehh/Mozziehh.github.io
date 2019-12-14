@@ -1,0 +1,561 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Android开源框架分析系列之-Fresco | 差不多胡先生</title>
+<meta name="description" content="书山有路勤为径，学海无涯苦作舟" />
+<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1576293729454">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://Mozziehh.github.io/styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://Mozziehh.github.io">
+  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1576293729454" alt="">
+  </a>
+  <h1 class="site-title">
+    差不多胡先生
+  </h1>
+  <p class="site-description">
+    书山有路勤为径，学海无涯苦作舟
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              Android开源框架分析系列之-Fresco
+            </h2>
+            <div class="post-info">
+              <span>
+                2019-12-14
+              </span>
+              <span>
+                17 min read
+              </span>
+              
+                <a href="https://Mozziehh.github.io/tag/S04Qxg07W" class="post-tag">
+                  # Fresco
+                </a>
+              
+                <a href="https://Mozziehh.github.io/tag/IM_UjSAcF" class="post-tag">
+                  # Android
+                </a>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <p>##为什么选择Fresco<br>
+1、它是Facebook出品的开源库，避免重复造轮子；</p>
+<p>2、Fresco 支持 Android2.3(API level 9) 及其以上系统,基本上可以含盖目前市场上的绝大部分android手机，我们目前的支持的最低版本android 4.0(API level 14);</p>
+<p>3、在5.0以下系统，Fresco将图片放到一个特别的内存共享区域（ashmem）。在图片不显示的时候，占用的内存会自动被释放。这会使得APP更加流畅，减少因图片内存占用而引发的OOM。</p>
+<p>4、使用简单，一行代码setImageURI()就可以加载图片和显示；</p>
+<p>5、支持三级缓存，Bitmap缓存、未解码图片缓存、文件缓存；</p>
+<p>6、对okHttp和volley网络库的兼容，目前我们项目中使用的是volley网络库，可以灵活配置；</p>
+<p>7、支持的图片格式有jpg/jpeg、png、jpeg图片的渐进式呈现、gif、webP；</p>
+<p>##带着问题看文章<br>
+按照国际惯例，请先阅读如下题目，如果你会了，那么就可以关闭文章了：</p>
+<p>1、Fresco和Glide的对比？（大小、加载生命周期、图片格式、旋转裁减、缓存方式）</p>
+<p>2、DraweeView中成员变量DraweeHolder与DraweeHierarchy与DraweeController三者之间的关系？</p>
+<p>3、当view被从ViewGroup临时分离时回调，执行了Fresco的哪个方法？</p>
+<p>4、Fresco加载图片的几种方式？（Center.CENTER_INSIDE、Fit.CENTER等）</p>
+<p>5、Fresco在管理ashmem区域采用了哪种方式回收内存？</p>
+<p>6、Fresco在加载图片时，为了缓解OOM除了采用ashmem，还有什么策略？采样的策略是如何做的？</p>
+<p>7、Fresco内部使用LRU算法维护图片池，那么对于那些不经常变动但是需要常驻的图片，Fresco可以怎么处理？</p>
+<p>8、Fresco内部是如何获取本地缓存路径的？<br>
+##它和Glide的对比<br>
+###包大小&amp;复杂度<br>
+fresco的包比较复杂，因此Facebook将其拆分成几个不同的aar库，可根据需要分别加载依赖，大小3M左右。</p>
+<p>glide包还好，除okhttp拆分出单独的aar包外，其他功能均在一个aar包中。glide拆分出了单独的图片处理库，可以支持对图片的裁剪，旋转，模糊和滤镜等操作，大小300KB左右。</p>
+<p>###影响一次图片加载过程的生命周期对象（即一次图片加载受谁的生命周期控制影响）<br>
+fresco：图片的加载受view生命周期的影响</p>
+<p>glide：图片的加载受context的生命周期影响，context可以是fragment、activity、application。</p>
+<p>###支持的图片格式<br>
+fresco：png、jpeg、webp、gif、jfif；<br>
+glide：png、jpeg、webp、gif。</p>
+<p>###支持图片的旋转和裁剪<br>
+fresco和glide均支持图片的旋转和裁剪。</p>
+<p>fresco：</p>
+<p>图片旋转：</p>
+<p>imageRequestBuilder.setRotationOptions(RotationOptions.forceRotation(RotationOptions.ROTATE_90));</p>
+<p>图片的裁剪：</p>
+<p>imageRequestBuilder.setResizeOptions(new ResizeOptions(reqWidth, reqHeight));</p>
+<p>glide：</p>
+<p>图片的旋转：</p>
+<p>创建BitmapTransformation 对象在加载图片的时候传入，</p>
+<p>Glide.with( context ).load( eatFoodyImages[0] ).transform( new RotateTransformation( context, 90f )).into( imageView);</p>
+<p>图片的裁剪：</p>
+<p>a、直接使用override(imageWidth, imageWidth)方法，</p>
+<p>Glide.with( context ).load( eatFoodyImages[0] ).override(imageWidth, imageWidth).into( imageView);</p>
+<p>b、创建BitmapTransformation 对象在加载图片的时候传入，</p>
+<p>Glide.with( context ).load( eatFoodyImages[0] ).transform( new ResizeTransformation( context, width,height )).into( imageView);</p>
+<h3 id="缓存方式">缓存方式</h3>
+<p>fresco：三级缓存：二级内存缓存 + 磁盘文件缓存，只有第一级内存缓存在UI线程中操作，其他均在io线程中</p>
+<p>fresco二级内存缓存分别是：</p>
+<p>a、bitmap对象缓存；</p>
+<p>b、png、jpeg等格式的文件缓存，需要解码成bitmap对象。</p>
+<p>glide：二级内存缓存（严格意义上来说只有一级，第二级可以忽略）加磁盘文件缓存，内存缓存均在UI线程中，磁盘缓存在io线程中操作。</p>
+<p>glide二级内存缓存分别是：</p>
+<p>a、bitmap对象缓存；</p>
+<p>b、WeakReference(bitmap)缓存，即弱引用bitmap对象缓存。</p>
+<h3 id="代码侵入式">代码侵入式</h3>
+<p>fresco在使用的时候基本都要引入其封装的DraweeView，代码侵入性很强。glide代码侵入性相比不强。</p>
+<p>##Fresco架构<br>
+<img src="https://Mozziehh.github.io/post-images/1576291547391.png" alt=""></p>
+<p>DraweeView中成员变量DraweeHolder主要用于控制逻辑层，DraweeHolder包含DraweeHierarchy和DraweeController，DraweeHierarchy用于存储图像，DraweeController用于控制显示图像，为什么把DraweeHierarchy和DraweeController封装到DraweeHolder 中呢？是为了解藕，通过DraweeHolder可以方便的使用这两个组件。DraweeView 把获得的 Event 转发给 Controller，然后 Controller 根据 Event 来决定是否需要显示和隐藏 （包括动画）图像，而这些图像都存储在 Hierarchy 中，最后 DraweeView 绘制时直接通过 getTopLevelDrawable 就可以获取需要显示的图像。</p>
+<p>##Fresco核心显示处理<br>
+看一下DraweeView重写了View的四个方法：<br>
+@Override<br>
+protected void onAttachedToWindow() {<br>
+super.onAttachedToWindow();<br>
+mDraweeHolder.onAttach();<br>
+}</p>
+<pre><code>@Override
+protected void onDetachedFromWindow() {
+super.onDetachedFromWindow();
+mDraweeHolder.onDetach();
+}
+
+@Override
+public void onStartTemporaryDetach() {
+super.onStartTemporaryDetach();
+mDraweeHolder.onDetach();
+}
+
+@Override
+public void onFinishTemporaryDetach() {
+super.onFinishTemporaryDetach();
+mDraweeHolder.onAttach();
+}
+</code></pre>
+<p>onAttachedToWindow 是view 本身的回调，当view 被添加到window中，被绘制之前的回调。如addview（this view）；<br>
+onDetachedFromWindow 是view 本身的回调，当view被从window中删除时的回调。如 removeview（this view）;<br>
+onStartTemporaryDetach 是view本身的回调，当view被从ViewGroup临时分离时回调，如listview中的item移出屏幕时；<br>
+onFinishTemporaryDetach 是view本身的回调，当view在回调onStartTemporaryDetach完成改变后，再次添加到ViewGroup时回调，如listview中复用的item划入屏幕时；<br>
+DraweeView通过这个两对方法来保证当view移出屏幕容器和添加进入屏幕容器时来调用mDraweeHolder.onAttach()和mDraweeHolder.onDetach()来保证显示图片的逻辑的，mDraweeHolder.onAttach()就是从Controller中获取要现实的图片资源显示，mDraweeHolder.onAttach()就是释放资源，具体实现可以跟一下源码查看；</p>
+<p>##fresco对内存缓存策略</p>
+<p>Fresco的内存缓存策略是根据android系统版本不同做了不同处理，5.0以下系统：图片不存储在Java heap，而是存储在ashmem，中间的字节 buffer同样位于native heap。使用”ashmem”（匿名共享内存）区域存储Bitmap缓存，这样Bitmap对象的创建、释放将永远不会触发GC，关于”ashmem”存储区域，它是一个不在Java堆区的一片存储内存空间，它的管理由Linux内核驱动管理，这块存储区域是别于堆 内存之外的一块空间，且这块空间是可以多进程共享的，GC的活动不会影响到它。5.0以上系统，由于内存管理的优化，所以对于5.0以上的系统 Fresco将Bitmap缓存直接放到了堆内存中。</p>
+<p>关于”ashmem”的存储区域，我们的应用程序并不能像访问堆内存一样直接访问这块内存块，但是也有一些例外，对于Bitmap而言，有一种 为”Purgeable Bitmap”可擦除的Bitmap位图是存储在这块内存区域中的，BitmapFactory.Options中有这么一个属性inPurgeable：</p>
+<pre><code>BitmapFactory.Options = new BitmapFactory.Options();
+options.inPurgeable = true;
+Bitmap bitmap = BitmapFactory.decodeByteArray(jpeg, 0, jpeg.length, options);
+</code></pre>
+<p>所以通过配置inPurgeable = true这个属性，这样解码出来的Bitmap位图就存储在”ashmem”区域中，之后用到”ashmem”中得图片时，则把这个图片从这个区域中取出来，渲染完毕后则放回这个位置。</p>
+<p>既然Fresco中Bitmap缓存在5.0以下是放在”ashmem”中，GC并不会回收它们，且也不会被”ashmeme”内置的清除机制回收 它们，所以这样虽然使得在堆中不会造成内存泄露，而在这块区域可能造成内存泄露，Fresco中采取的办法则是使用引用计数的方式，其中有一个 SharedReference这个类，这个类中有这么两个方法：addReference()和deleteReference()，通过这两个基本方 法来对引用进行计数，一旦计数为零时，则对应的资源将会清除（如：Bitmap.recycle()等），而Fresco为了考虑更容易被我们使用，又提 供了一个CloseableReference类，该类可以说是SharedReference类上功能的封装，CloseableReference同 时也实现了Cloneable、Closeable接口，它在调用.clone()方法时同时会调用addReference()来增加一个引用计数，在 调用.close()方法时同时会调用deleteReference()来删除一个引用计数，所以在使用Fresco的使用，我们都是与 CloseableReference类打交道，使用CloseableReference必须遵循以下两条规则：</p>
+<p>1）在赋值CloseableReference给新对象的时候，调用.clone()进行赋值</p>
+<p>2）在超出作用域范围的时候，必须调用.close()，通常会在finally代码块中调用</p>
+<p>##图片采样处理<br>
+为防止使用者对图片的大小没有概念或者直接加载过大图片时造成内存溢出的风险加大，按照经验统一了三个采样标准：<br>
+DefaultConfigCentre.ResizeOptionsType.SMALL_TYPE<br>
+DefaultConfigCentre.ResizeOptionsType.MIDDLE_TYPE<br>
+DefaultConfigCentre.ResizeOptionsType.BIG_TYPE</p>
+<p>##对于那些不经常变动的图片，我们应该怎么处理；</p>
+<p>当我们有些图片不经常动时需要能长时间保存，但如果放入同一个本地缓存文件下时，随着不断加载图片到文件缓存设定上限时，根据LruCach的规则，需要长时间保存的图片可能就会被清除掉，那这就不满足我们的需求了，应该怎么处理呢？</p>
+<p>1）强大的fresco已经给我们提供了解决方案，引用官网资料：<br>
+用一个文件还是两个文件缓存?<br>
+如果要使用2个缓存，在配置image pipeline 时调用 setMainDiskCacheConfig 和 setSmallImageDiskCacheConfig 方法即可。大部分的应用有一个文件缓存就够了，但是在一些情况下，你可能需要两个缓存。比如你也许想把小文件放在一个缓存中，大文件放在另外一个文件中，这样小文件就不会因大文件的频繁变动而被从缓存中移除。<br>
+至于什么是小文件，这个由应用来区分，在创建image request, 设置 ImageType 即可:<br>
+ImageRequest request = ImageRequest.newBuilderWithSourceUri(uri)<br>
+.setImageType(ImageType.SMALL)</p>
+<p>如果你仅仅需要一个缓存，那么不调用setSmallImageDiskCacheConfig即可。Image pipeline 默认会使用同一个缓存，同时ImageType也会被忽略。</p>
+<p>2）实现方法：</p>
+<pre><code>配置
+DiskCacheConfig diskCacheConfig = DiskCacheConfig.newBuilder()            
+.setBaseDirectoryName()//设置主缓存目录文件名
+.setBaseDirectoryPath()//设置主缓存目录根目录
+.setMaxCacheSize()//设置主缓存文件夹最大缓存数
+.setMaxCacheSizeOnLowDiskSpace()//设置主缓存文件夹当磁盘空间低时的最大的最大缓存值
+.setMaxCacheSizeOnVeryLowDiskSpace()//设置主缓存文件夹当磁盘剩余空间极低时的最大缓存值
+.build();
+DiskCacheConfig smallDiskCacheConfig = DiskCacheConfig.newBuilder()
+.setBaseDirectoryName()//设置次缓存目录文件名
+.setBaseDirectoryPath()//设置次缓存目录根目录
+.setMaxCacheSize()//设置次缓存文件夹最大缓存数
+.setMaxCacheSizeOnLowDiskSpace()//设置次缓存文件夹当磁盘空间低时的最大的最大缓存值
+.setMaxCacheSizeOnVeryLowDiskSpace()//设置次缓存文件夹当磁盘剩余空间极低时的最大缓存值
+.build();
+
+ImagePipelineConfig pipelineConfig = ImagePipelineConfig.newBuilder(mContext)
+.setSmallImageDiskCacheConfig(smallDiskCacheConfig)//磁盘缓存配置，存储首页图片的配置（总，三级缓存）
+.setMainDiskCacheConfig(diskCacheConfig)//磁盘缓存配置（总，三级缓存）
+.setCacheKeyFactory(new CdnAwareCacheKeyFactory())//uri匹配策略，目前只匹配path，就是为了避免cdn图片会多次请求
+.build();
+</code></pre>
+<p>自定义WubaDraweeView控件中添加缓存到次缓存目录的方法；</p>
+<pre><code>public void setSmallDiskImageURI(Uri uri){
+ImageRequest request = ImageRequestBuilder.newBuilderWithSource(uri)
+.setImageType(ImageRequest.ImageType.SMALL)
+.build();
+DraweeController controller = FrescoWubaCore.newDraweeControllerBuilder()
+.setImageRequest(request)
+.setOldController(getController())
+.build();
+setController(controller);
+}
+</code></pre>
+<p>对于需要不经常变动需要长时间保存的可以使用以上方法；<br>
+目前ImageRequest.ImageType只支持两种，以下是fresco源码，Default是默认的回放入DiskCacheConfig，根据类型选择disk缓存策略，源码：</p>
+<pre><code>/**    * An enum describing type of the image.
+*/
+public enum ImageType {
+/* Indicates that this image should go in the small disk cache, if one is being used */
+SMALL,
+
+/* Default */
+DEFAULT,
+}
+
+public void produceResults(
+final Consumer&lt;EncodedImage&gt; consumer,
+final ProducerContext producerContext) {
+ImageRequest imageRequest = producerContext.getImageRequest();
+if (!imageRequest.isDiskCacheEnabled()) {
+maybeStartInputProducer(consumer, consumer, producerContext);
+return;
+}
+
+producerContext.getListener().onProducerStart(producerContext.getId(), PRODUCER_NAME);
+
+final CacheKey cacheKey =
+    mCacheKeyFactory.getEncodedCacheKey(imageRequest, producerContext.getCallerContext());
+boolean isSmallRequest = (imageRequest.getImageType() == ImageRequest.ImageType.SMALL);
+final BufferedDiskCache preferredCache = isSmallRequest ?
+    mSmallImageBufferedDiskCache : mDefaultBufferedDiskCache;//根据类型选择disk缓存；
+</code></pre>
+<p>......</p>
+<p>##如何获取本地缓存路径？<br>
+有时我们将需要fresco已加载的图片的本地路径获取到，然后对本地路径作处理，获取方法：<br>
+1）判断图片的uri是否已缓存；</p>
+<pre><code>/**
+* 判断是否已缓存本地
+* @param loadUri
+* @return
+*/
+private boolean isDownloaded(Uri loadUri) {
+    if (loadUri == null) {
+        return false;
+    }
+    ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(loadUri)
+            .build();
+    CacheKey cacheKey = new CdnAwareCacheKeyFactory()
+            .getEncodedCacheKey(imageRequest);
+    return ImagePipelineFactory.getInstance()
+            .getMainFileCache().hasKey(cacheKey);
+}
+</code></pre>
+<p>2）如果已缓存可获取本地路径</p>
+<pre><code>/**
+* 根据uri获取本地缓存路径
+* @param loadUri
+* @return
+*/
+private String getPath(Uri loadUri){
+    ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(loadUri)
+            .build();
+    CacheKey cacheKey = new CdnAwareCacheKeyFactory()
+            .getEncodedCacheKey(imageRequest);
+    BinaryResource resource = ImagePipelineFactory.getInstance()
+            .getMainFileCache().getResource(cacheKey);
+    File file=((FileBinaryResource)resource).getFile();
+    return file.getPath();
+}
+</code></pre>
+<p>看一下cachkey的中标规则，hasKey(cacheKey)的源码：</p>
+<pre><code>/**
+* 根据uri获取本地缓存路径
+* @param loadUri
+* @return
+*/
+private String getPath(Uri loadUri){
+    ImageRequest imageRequest = ImageRequestBuilder.newBuilderWithSource(loadUri)
+            .build();
+    CacheKey cacheKey = new CdnAwareCacheKeyFactory()
+            .getEncodedCacheKey(imageRequest);
+    BinaryResource resource = ImagePipelineFactory.getInstance()
+            .getMainFileCache().getResource(cacheKey);
+    File file=((FileBinaryResource)resource).getFile();
+    return file.getPath();
+}
+</code></pre>
+<p>看一下cachkey的中标规则，hasKey(cacheKey)的源码：</p>
+<pre><code>@Override
+public boolean hasKey(final CacheKey key) {
+synchronized (mLock) {
+    if (hasKeySync(key)) {
+    return true;
+    }
+    try {
+    String resourceId = null;
+    boolean retval = false;
+    if (mIndex.containsKey(key)) {
+        resourceId = mIndex.get(key);
+        retval = mStorage.contains(resourceId, key);
+    } else {
+        List&lt;String&gt; resourceIds = getResourceIds(key);
+        for (int i = 0; i &lt; resourceIds.size(); i++) {
+        resourceId = resourceIds.get(i);
+        retval = mStorage.contains(resourceId, key);
+        if (retval) {
+            break;
+        }
+        }
+    }
+    if (retval) {
+        mIndex.put(key, resourceId);
+    } else {
+        mIndex.remove(key);
+    }
+    return retval;
+    } catch (IOException e) {
+    return false;
+    }
+}
+}
+@VisibleForTesting
+static List&lt;String&gt; getResourceIds(final CacheKey key) {
+try {
+    final List&lt;String&gt; ids;
+    if (key instanceof MultiCacheKey) {
+    List&lt;CacheKey&gt; keys = ((MultiCacheKey) key).getCacheKeys();
+    ids = new ArrayList&lt;&gt;(keys.size());
+    for (int i = 0; i &lt; keys.size(); i++) {
+        ids.add(SecureHashUtil.makeSHA1HashBase64(keys.get(i).toString().getBytes(&quot;UTF-8&quot;)));
+    }
+    } else {
+    ids = new ArrayList&lt;&gt;(1);
+    ids.add(SecureHashUtil.makeSHA1HashBase64(key.toString().getBytes(&quot;UTF-8&quot;)));
+    }
+    return ids;
+} catch (UnsupportedEncodingException e) {
+    // This should never happen. All VMs support UTF-8
+    throw new RuntimeException(e);
+}
+}
+
+public static String makeSHA1HashBase64(byte[] bytes) {
+try {
+    MessageDigest md = MessageDigest.getInstance(&quot;SHA-1&quot;);
+    md.update(bytes, 0, bytes.length);
+    byte[] sha1hash = md.digest();
+    return Base64.encodeToString(sha1hash, Base64.URL_SAFE | Base64.NO_PADDING | Base64.NO_WRAP);
+} catch (NoSuchAlgorithmException e) {
+    throw new RuntimeException(e);
+}
+}
+</code></pre>
+<p>可以看出CachKey的匹配规则时，调用SecureHashUtil.makeSHA1HashBase64(keys.get(i).toString().getBytes(&quot;UTF-8&quot;))用UTF－8对CachKey的toString值encode，然后用SHA-1算法加密获取摘要，再用Base64 encode成字符串来进行比较的，所以关键方法时CachKey的toString方法，一切操作都是基于这个方法生成的；</p>
+<p>##为降低OOM风险，我们应该向下采样Downsampling，设置setResizeOptions</p>
+<p>###向下采样如何配置；<br>
+向下采样是一个正在实验中的特性。使用的话需要在设置 image pipeline 时进行设置：<br>
+.setDownsampleEnabled(true)<br>
+如果开启该选项，pipeline 会向下采样你的图片， 同时需要设置setResizeOptions 。<br>
+如果不开启该项，设置setResizeOptions，只有JPEG图片格式才起作用；<br>
+向下采样在大部分情况下比 resize 更快。除了支持 JPEG 图片，它还支持 PNG 和 WebP(除动画外) 图片；</p>
+<p>###自定义向下采样的方法；</p>
+<pre><code>/**
+* 根据图片的uri、屏幕要显示图片的宽高来加载图片
+* 为的是根据实际显示尺寸来加载图片
+* @param resizeWidth 图片要显示的宽 单位px
+* @param resizeHeight 图片要显示的高 单位px
+* @param uri 图片的uri
+*
+*/
+public void setResizeOptionsImageURI(@Nullable Uri uri,int resizeWidth,int resizeHeight){
+    LOGGER.d(DefaultConfigCentre.DEFAULT_TAG,&quot;WubaDraweeView:setResizeOptionsImageURI == resizeWidth=&quot;+resizeWidth+&quot;,resizeHeight=&quot;+resizeHeight);
+    ImageRequest imageRequest = null;
+    if (uri == null){
+        LOGGER.d(DefaultConfigCentre.DEFAULT_TAG,&quot;WubaDraweeView:setResizeOptionsImageURI == uri is null&quot;);
+    }else {
+        ResizeOptions options = null;
+        if (resizeHeight&gt;0&amp;&amp;resizeWidth&gt;0) {
+            options = new ResizeOptions(resizeWidth, resizeHeight);
+        }else{
+            LOGGER.d(DefaultConfigCentre.DEFAULT_TAG,&quot;WubaDraweeView:setResizeOptionsImageURI == resizeHeight &lt; 0 or resizeWidth &lt; 0&quot;);
+        }
+        imageRequest = ImageRequestBuilder.newBuilderWithSource(uri)
+                .setResizeOptions(options)
+                .build();
+    }
+    setControllerWithParams(imageRequest,null);
+}
+/**
+* 根据图片的uri、屏幕要显示图片采样类型的来加载图片
+* 为的是根据实际显示尺寸来加载图片
+* @param resizeOptionsType 图片采样类型，DefaultConfigCentre.ResizeOptionsType.SMALL_TYPE/MIDDLE_TYPE/BIG_TYPE；
+* @param uri 图片的uri
+*
+*/
+public void setResizeOptionsTypeImageURI(Uri uri,int resizeOptionsType){
+    setResizeOptionsImageURI(uri, WubaResizeOptionsUtil.getNewResizeOptionsByType(resizeOptionsType));
+}
+</code></pre>
+<p>###自定义向下采样的类型有三种，大中小；<br>
+根据项目中使用图片宽高频率较多的情况分为三种：</p>
+<pre><code>/**
+* 根据图片的采样类型获取ResizeOptions对象；
+* @param resizeOptionsType 图片的采样类型
+*/
+public static ResizeOptions getNewResizeOptionsByType(int resizeOptionsType){
+    int width = 0;
+    int height = 0;
+    switch (resizeOptionsType){
+        case DefaultConfigCentre.ResizeOptionsType.SMALL_TYPE:
+            width = 200;
+            height = 150;
+            break;
+        case DefaultConfigCentre.ResizeOptionsType.MIDDLE_TYPE:
+            width = 360;
+            height = 300;
+            break;
+        case DefaultConfigCentre.ResizeOptionsType.BIG_TYPE:
+            width = 720;
+            height = 600;
+            break;
+        default:
+            checkResizeOptionsType(resizeOptionsType);
+            break;
+
+    }
+    return new ResizeOptions(width,height);
+}
+</code></pre>
+<p>###默认向下采样类型；<br>
+如果我们不设置向下采样的类型，那默认我们会采用DefaultConfigCentre.ResizeOptionsType.BIG_TYPE，是为了预防图片太大，我们默认处理造成OOM的情况；</p>
+<pre><code>@Override
+public void setImageURI(Uri uri, @Nullable Object callerContext) {
+    setResizeOptionsTypeImageURI(uri,DefaultConfigCentre.ResizeOptionsType.BIG_TYPE);
+}</code></pre>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li>
+<ul>
+<li><a href="#%E7%BC%93%E5%AD%98%E6%96%B9%E5%BC%8F">缓存方式</a></li>
+<li><a href="#%E4%BB%A3%E7%A0%81%E4%BE%B5%E5%85%A5%E5%BC%8F">代码侵入式</a></li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://Mozziehh.github.io/post/java-zhi-shi-ti-xi-zhi-fan-xing-yu">
+              <h3 class="post-title">
+                Java知识体系之-泛型与泛型擦除
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://Mozziehh.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+  // This should probably be throttled.
+  // Especially because it triggers during smooth scrolling.
+  // https://lodash.com/docs/4.17.10#throttle
+  // You could do like...
+  // window.addEventListener("scroll", () => {
+  //    _.throttle(doThatStuff, 100);
+  // });
+  // Only not doing it here to keep this Pen dependency-free.
+
+  window.addEventListener("scroll", event => {
+    let fromTop = window.scrollY;
+
+    mainNavLinks.forEach((link, index) => {
+      let section = document.getElementById(decodeURI(link.hash).substring(1));
+      let nextSection = null
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add("current");
+          } else {
+            link.classList.remove("current");    
+          }
+        } else {
+          link.classList.add("current");
+        }
+      } else {
+        link.classList.remove("current");
+      }
+    });
+  });
+
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
