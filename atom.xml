@@ -2,14 +2,46 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://Mozziehh.github.io</id>
     <title>差不多胡先生</title>
-    <updated>2019-12-14T03:22:42.705Z</updated>
+    <updated>2020-01-07T06:14:02.487Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://Mozziehh.github.io"/>
     <link rel="self" href="https://Mozziehh.github.io/atom.xml"/>
     <subtitle>书山有路勤为径，学海无涯苦作舟</subtitle>
     <logo>https://Mozziehh.github.io/images/avatar.png</logo>
     <icon>https://Mozziehh.github.io/favicon.ico</icon>
-    <rights>All rights reserved 2019, 差不多胡先生</rights>
+    <rights>All rights reserved 2020, 差不多胡先生</rights>
+    <entry>
+        <title type="html"><![CDATA[#Python使用规范]]></title>
+        <id>https://Mozziehh.github.io/post/python-shi-yong-gui-fan</id>
+        <link href="https://Mozziehh.github.io/post/python-shi-yong-gui-fan">
+        </link>
+        <updated>2020-01-07T06:10:45.000Z</updated>
+        <content type="html"><![CDATA[<p>最近一直在写python脚本，马上开源了，发现里面有很多不规范的使用方法，在这里特别记录：</p>
+<p>##编码</p>
+<ul>
+<li>统一使用 UTF-8 编码；</li>
+<li>导入的包在代码的最前面；</li>
+<li>每行代码不宜过长，不要超过120字符；</li>
+<li>使用面向对象思想编程，按照功能划分类，按照职责划分方法；</li>
+</ul>
+<p>##关于注释</p>
+<ul>
+<li>单行文档注释可以使用#标注；</li>
+<li>多行可以使用三个双引号&quot;&quot;&quot;...&quot;&quot;&quot;；</li>
+<li>关键方法要使用注释，方便维护；</li>
+</ul>
+<p>##类和方法</p>
+<ul>
+<li>对于一个类，里面有多个方法可以使用_init_()方法来初始化变量，以便该类中各个方法使用；假如接入该类只有一个方法，那么可以忽略_init()方法，直接自定义方法;</li>
+<li>方法之间可以不空行，类与类之间要空行；</li>
+<li>类的名字使用驼峰命名法，首字母大写；</li>
+<li>所有方法，全部使用小写；</li>
+<li>私有方法，使用_下划线开头；</li>
+<li>常量使用大写；</li>
+<li>每个语句执行完可以不加&quot;;&quot;，但是要注意使用换行</li>
+</ul>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Android开源框架分析系列之-Fresco]]></title>
         <id>https://Mozziehh.github.io/post/android-kai-yuan-kuang-jia-fen-xi-xi-lie-zhi-fresco</id>
