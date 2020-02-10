@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://Mozziehh.github.io</id>
     <title>差不多胡先生</title>
-    <updated>2020-01-07T06:15:12.945Z</updated>
+    <updated>2020-02-10T14:35:38.884Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://Mozziehh.github.io"/>
     <link rel="self" href="https://Mozziehh.github.io/atom.xml"/>
@@ -10,6 +10,61 @@
     <logo>https://Mozziehh.github.io/images/avatar.png</logo>
     <icon>https://Mozziehh.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, 差不多胡先生</rights>
+    <entry>
+        <title type="html"><![CDATA[android开源框架分析系列之-EventBus]]></title>
+        <id>https://Mozziehh.github.io/post/eventbuszen-me-jiu-xue-bu-ming-bai-ni</id>
+        <link href="https://Mozziehh.github.io/post/eventbuszen-me-jiu-xue-bu-ming-bai-ni">
+        </link>
+        <updated>2020-02-10T14:01:54.000Z</updated>
+        <summary type="html"><![CDATA[<p>最近在看开源框架，对于经常使用的EventBus，觉得用起来非常简单，所以比较好奇，看了几篇文章。然后把EventBus的关键点提取到了Anki上，随着时间的推移，突然发现印象越来越模糊，反反复复的看光是看理论印象还是不够深刻。于是，打算深挖一下EventBus的源码。</p>
+]]></summary>
+        <content type="html"><![CDATA[<p>最近在看开源框架，对于经常使用的EventBus，觉得用起来非常简单，所以比较好奇，看了几篇文章。然后把EventBus的关键点提取到了Anki上，随着时间的推移，突然发现印象越来越模糊，反反复复的看光是看理论印象还是不够深刻。于是，打算深挖一下EventBus的源码。</p>
+<!-- more -->
+<p>开篇习惯，带着问题看源码，如果你能回答出如下问题，那么，出门右转，不要浪费宝贵的大好青春~<br>
+1.简单的描述一个EventBus的使用Demo？<br>
+2.EventBus的注册是怎么回事？<br>
+3.当我使用PostEvent发送事件之后，EventBus会执行哪些流程？它是如何找到对应的事件的？<br>
+4.EventBus的取消注册是怎么回事？<br>
+5.简单的说一下粘性事件？</p>
+<!-- more -->
+<p>#关于EventBus</p>
+<p>EventBus的简介，网上有的是，这里不再赘述，你只要知道，它使用的是观察者模式，通过Event来传递。</p>
+<p>#带着问题看源码</p>
+<p>##简单的描述一个EventBus的使用Demo？</p>
+<p>###注册</p>
+<pre><code>EventBus.getDefault().register(this)；
+</code></pre>
+<p>###自定义事件</p>
+<pre><code>public class MessageEvent{
+    private String message;
+    public  MessageEvent(String message){
+        this.message=message;
+    }
+    public String getMessage() {
+        return message;
+    }
+
+    public void setMessage(String message) {
+        this.message = message;
+    }
+}
+</code></pre>
+<p>###发送</p>
+<pre><code>EventBus.getDefault().post(messageEvent);
+</code></pre>
+<p>###处理事件</p>
+<pre><code>@Subscribe(threadMode = ThreadMode.MAIN)
+public void XXX(MessageEvent messageEvent) {
+    ...
+}
+</code></pre>
+<p>###取消注册</p>
+<pre><code>EventBus.getDefault().unRegister(this)；
+</code></pre>
+<p>#参考文章<br>
+https://www.jianshu.com/p/f9ae5691e1bb</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[Python使用规范]]></title>
         <id>https://Mozziehh.github.io/post/python-shi-yong-gui-fan</id>

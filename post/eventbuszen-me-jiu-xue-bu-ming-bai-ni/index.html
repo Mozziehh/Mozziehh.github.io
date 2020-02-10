@@ -2,7 +2,7 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Java知识体系之-泛型与泛型擦除 | 差不多胡先生</title>
+<title>android开源框架分析系列之-EventBus | 差不多胡先生</title>
 <meta name="description" content="书山有路勤为径，学海无涯苦作舟" />
 <link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1581345334815">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
@@ -73,109 +73,65 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              Java知识体系之-泛型与泛型擦除
+              android开源框架分析系列之-EventBus
             </h2>
             <div class="post-info">
               <span>
-                2019-12-06
+                2020-02-10
               </span>
               <span>
-                3 min read
+                2 min read
               </span>
-              
-                <a href="https://Mozziehh.github.io/tag/HJM1ZTj1o" class="post-tag">
-                  # 泛型
-                </a>
-              
-                <a href="https://Mozziehh.github.io/tag/sZIUebvmn" class="post-tag">
-                  # Java
-                </a>
               
             </div>
             
             <div class="post-content-wrapper">
               <div class="post-content">
-                <p>#Java泛型与进阶<br>
-##什么是泛型<br>
-泛型是Java中一种常用的用于解决编译期间的类型转换异常的方式，防止在运行期间出现classCastException。</p>
-<p>代码如下：</p>
-<pre><code>public class GlmapperGeneric&lt;T&gt; {
-		private T t;
-    public void set(T t) { this.t = t; }
-    public T get() { return t; }
-  
-    public static void main(String[] args) {
-        // do nothing
+                <p>最近在看开源框架，对于经常使用的EventBus，觉得用起来非常简单，所以比较好奇，看了几篇文章。然后把EventBus的关键点提取到了Anki上，随着时间的推移，突然发现印象越来越模糊，反反复复的看光是看理论印象还是不够深刻。于是，打算深挖一下EventBus的源码。</p>
+<!-- more -->
+<p>开篇习惯，带着问题看源码，如果你能回答出如下问题，那么，出门右转，不要浪费宝贵的大好青春~<br>
+1.简单的描述一个EventBus的使用Demo？<br>
+2.EventBus的注册是怎么回事？<br>
+3.当我使用PostEvent发送事件之后，EventBus会执行哪些流程？它是如何找到对应的事件的？<br>
+4.EventBus的取消注册是怎么回事？<br>
+5.简单的说一下粘性事件？</p>
+<!-- more -->
+<p>#关于EventBus</p>
+<p>EventBus的简介，网上有的是，这里不再赘述，你只要知道，它使用的是观察者模式，通过Event来传递。</p>
+<p>#带着问题看源码</p>
+<p>##简单的描述一个EventBus的使用Demo？</p>
+<p>###注册</p>
+<pre><code>EventBus.getDefault().register(this)；
+</code></pre>
+<p>###自定义事件</p>
+<pre><code>public class MessageEvent{
+    private String message;
+    public  MessageEvent(String message){
+        this.message=message;
+    }
+    public String getMessage() {
+        return message;
     }
 
-  /**
-    * 不指定类型
-    */
-  public void noSpecifyType(){
-    GlmapperGeneric glmapperGeneric = new GlmapperGeneric();
-    glmapperGeneric.set(&quot;test&quot;);
-    // 需要强制类型转换
-    String test = (String) glmapperGeneric.get();
-    System.out.println(test);
-  }
-
-  /**
-    * 指定类型
-    */
-  public void specifyType(){
-    GlmapperGeneric&lt;String&gt; glmapperGeneric = new GlmapperGeneric();
-    glmapperGeneric.set(&quot;test&quot;);
-    // 不需要强制类型转换
-    String test = glmapperGeneric.get();
-    System.out.println(test);
-  }
-}
-</code></pre>
-<p>##泛型中的通配符<br>
-在泛型中，通常使用的通配符有如下几种：T，E，K，V ？ ，这些符号你可以自己指定，但是为了更好的理解，我们通常使用上述作为默认规则。<br>
-T：代表指定的Java类型；<br>
-E：代表Element；<br>
-K和V：用于在Map中存储的key-value；<br>
-？：代表不确定的Java类型；</p>
-<p>###？通配符<br>
-我们先来看一个例子：List&lt;? extend Animals&gt; list = new List();<br>
-此时，它表示的意思就是我们的这个list可以传递的就是继承了Animals的子类；</p>
-<p>###上届通配符<br>
-所谓的上届通配符就是&lt; ? extends E&gt;，代表的意思是传递任意一个E本身或者E的子类都OK。<br>
-###下届通配符<br>
-所谓的下届通配符就是&lt; ? super E&gt;，代表的意思是传递任意一个是E本身或者E的父类都OK。</p>
-<pre><code>private &lt;T&gt; void test(List&lt;? super T&gt; dst, List&lt;T&gt; src){
-    for (T t : src) {
-        dst.add(t);
+    public void setMessage(String message) {
+        this.message = message;
     }
 }
-
-public static void main(String[] args) {
-    List&lt;Dog&gt; dogs = new ArrayList&lt;&gt;();
-    List&lt;Animal&gt; animals = new ArrayList&lt;&gt;();
-    new Test3().test(animals,dogs);
-}
-// Dog 是 Animal 的子类
-class Dog extends Animal {
-
+</code></pre>
+<p>###发送</p>
+<pre><code>EventBus.getDefault().post(messageEvent);
+</code></pre>
+<p>###处理事件</p>
+<pre><code>@Subscribe(threadMode = ThreadMode.MAIN)
+public void XXX(MessageEvent messageEvent) {
+    ...
 }
 </code></pre>
-<p>###？和T的区别<br>
-从字面的意思上来看：？代表的是非指定的任意Java类，T代表的是指定的Java类，T只可以继承某个类，而？可以标识父类或者子类：? extend A , ? super A。</p>
-<p>##泛型擦除</p>
-<pre><code>// 指定泛型为String
-
-List&lt;String&gt; list1 = new ArrayList&lt;&gt;();
-// 指定泛型为Integer
-List&lt;Integer&gt; list2 = new ArrayList&lt;&gt;();
-
-System.out.println(list1.getClass() == list2.getClass()); // true
+<p>###取消注册</p>
+<pre><code>EventBus.getDefault().unRegister(this)；
 </code></pre>
-<p>在编译时，对于这些已经指定过的泛型，编译器会将它们都清除掉，这样的操作我们叫做泛型擦除。<br>
-规则：如果我们给泛型指定了上届，那么在擦除之后，它会指定到上届。否则，它将指定到Object。</p>
-<p>##参考地址</p>
-<p>https://juejin.im/post/5d5789d26fb9a06ad0056bd9</p>
-<p>https://juejin.im/post/5ceba1a2f265da1b95703558</p>
+<p>#参考文章<br>
+https://www.jianshu.com/p/f9ae5691e1bb</p>
 
               </div>
               <div class="toc-container">
@@ -188,9 +144,9 @@ System.out.println(list1.getClass() == list2.getClass()); // true
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-xian-cheng-chi-zhuan">
+            <a href="https://Mozziehh.github.io/post/python-shi-yong-gui-fan">
               <h3 class="post-title">
-                Android源码阅读系列之-线程池[转]
+                Python使用规范
               </h3>
             </a>
           </div>
