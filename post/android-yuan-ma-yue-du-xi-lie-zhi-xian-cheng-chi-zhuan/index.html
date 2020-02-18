@@ -2,9 +2,9 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Android源码阅读系列之-线程池[转] | 差不多胡先生</title>
+<title>Android源码阅读系列之-线程池[转] | 程序员老胡</title>
 <meta name="description" content="书山有路勤为径，学海无涯苦作舟" />
-<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1581428225089">
+<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1582005940576">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://Mozziehh.github.io/styles/main.css">
@@ -20,10 +20,10 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://Mozziehh.github.io">
-  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1581428225089" alt="">
+  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1582005940576" alt="">
   </a>
   <h1 class="site-title">
-    差不多胡先生
+    程序员老胡
   </h1>
   <p class="site-description">
     书山有路勤为径，学海无涯苦作舟
@@ -83,7 +83,7 @@
                 11 min read
               </span>
               
-                <a href="https://Mozziehh.github.io/tag/sZIUebvmn" class="post-tag">
+                <a href="https://Mozziehh.github.io/tag/sZIUebvmn/" class="post-tag">
                   # Java
                 </a>
               
@@ -122,7 +122,7 @@ threadFactory： 用于设置创建线程的工厂，可以给创建的线程设
 handler：  线城池的饱和策略事件，主要有四种类型。</p>
 <p>#任务执行<br>
 线程池执行流程，即对应execute()方法：<br>
-<img src="https://Mozziehh.github.io/post-images/1575550465980.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1575550465980.png" alt="" loading="lazy"></p>
 <p>·提交一个任务，线程池里存活的核心线程数小于线程数corePoolSize时，线程池会创建一个核心线程去处理提交的任务。<br>
 ·如果线程池核心线程数已满，即线程数已经等于corePoolSize，一个新提交的任务，会被放进任务队列workQueue排队等待执行。<br>
 ·当线程池里面存活的线程数已经等于corePoolSize了,并且任务队列workQueue也满，判断线程数是否达·到maximumPoolSize，即最大线程数是否已满，如果没到达，创建一个非核心线程执行提交的任务。<br>
@@ -137,7 +137,7 @@ handler：  线城池的饱和策略事件，主要有四种类型。</p>
 ·非核心线程比作外包员工<br>
 ·阻塞队列比作需求池<br>
 ·提交任务比作提需求</p>
-<figure data-type="image" tabindex="1"><img src="https://Mozziehh.github.io/post-images/1575550700308.png" alt=""></figure>
+<figure data-type="image" tabindex="1"><img src="https://Mozziehh.github.io/post-images/1575550700308.png" alt="" loading="lazy"></figure>
 <p>·当产品提个需求，正式员工（核心线程）先接需求（执行任务）<br>
 ·如果正式员工都有需求在做，(即核心线程数已满），产品就把需求先放需求池（阻塞队列）。<br>
 ·如果需求池(阻塞队列)也满了，但是这时候产品继续提需求,怎么办呢？那就请外包（非核心线程）来做。<br>
@@ -149,7 +149,7 @@ handler：  线城池的饱和策略事件，主要有四种类型。</p>
 <p>在使用线程池处理任务的时候，任务代码可能抛出RuntimeException，抛出异常后，线程池可能捕获它，也可能创建一个新的线程来代替异常的线程，我们可能无法感知任务出现了异常，因此我们需要考虑线程池异常情况。</p>
 <p>#线程池exec.submit(runnable)的执行流程</p>
 <p>通过debug上面有异常的submit方法（建议大家也去debug看一下,图上的每个方法内部是我打断点的地方），处理有异常submit方法的主要执行流程图：</p>
-<figure data-type="image" tabindex="2"><img src="https://Mozziehh.github.io/post-images/1575551509586.png" alt=""></figure>
+<figure data-type="image" tabindex="2"><img src="https://Mozziehh.github.io/post-images/1575551509586.png" alt="" loading="lazy"></figure>
 <p>#线程池的工作队列<br>
 ##线程池都有哪几种工作队列？</p>
 <p>·ArrayBlockingQueue:（有界队列）是一个用数组实现的有界阻塞队列，按FIFO排序量。</p>
@@ -177,7 +177,7 @@ FixedThreadPool 适用于处理CPU密集型的任务，确保CPU在长期被工�
 没有所谓的非空闲时间，即keepAliveTime为0<br>
 阻塞队列为无界队列LinkedBlockingQueue</p>
 <p>####工作机制：<br>
-<img src="https://Mozziehh.github.io/post-images/1575555765273.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1575555765273.png" alt="" loading="lazy"></p>
 <p>####提交任务<br>
 如果线程数少于核心线程，创建核心线程执行任务<br>
 如果线程数等于核心线程，把任务添加到LinkedBlockingQueue阻塞队列<br>
@@ -209,7 +209,7 @@ threadFactory);<br>
 非核心线程空闲存活时间为60秒</p>
 <p>当提交任务的速度大于处理任务的速度时，每次提交一个任务，就必然会创建一个线程。极端情况下会创建过多的线程，耗尽 CPU 和内存资源。由于空闲 60 秒的线程会被终止，长时间保持空闲的 CachedThreadPool 不会占用任何资源。<br>
 工作机制<br>
-<img src="https://Mozziehh.github.io/post-images/1575555947765.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1575555947765.png" alt="" loading="lazy"></p>
 <p>####提交任务<br>
 因为没有核心线程，所以任务直接加到SynchronousQueue队列。<br>
 判断是否有空闲线程，如果有，就去取出任务执行。<br>
@@ -299,7 +299,7 @@ private static final int STOP       =  1 &lt;&lt; COUNT_BITS;<br>
 private static final int TIDYING    =  2 &lt;&lt; COUNT_BITS;<br>
 private static final int TERMINATED =  3 &lt;&lt; COUNT_BITS;<br>
 复制代码线程池各个状态切换图：<br>
-<img src="https://Mozziehh.github.io/post-images/1575556444104.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1575556444104.png" alt="" loading="lazy"></p>
 <p>###RUNNING</p>
 <p>该状态的线程池会接收新任务，并处理阻塞队列中的任务;<br>
 调用线程池的shutdown()方法，可以切换到SHUTDOWN状态;<br>
@@ -329,7 +329,7 @@ terminated()执行完毕，进入TERMINATED状态</p>
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-handler">
+            <a href="https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-handler/">
               <h3 class="post-title">
                 Android源码阅读系列之-Handler
               </h3>

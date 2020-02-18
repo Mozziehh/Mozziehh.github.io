@@ -1,19 +1,19 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://Mozziehh.github.io</id>
-    <title>差不多胡先生</title>
-    <updated>2020-02-11T13:37:13.901Z</updated>
+    <title>程序员老胡</title>
+    <updated>2020-02-18T06:05:45.266Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://Mozziehh.github.io"/>
     <link rel="self" href="https://Mozziehh.github.io/atom.xml"/>
     <subtitle>书山有路勤为径，学海无涯苦作舟</subtitle>
     <logo>https://Mozziehh.github.io/images/avatar.png</logo>
     <icon>https://Mozziehh.github.io/favicon.ico</icon>
-    <rights>All rights reserved 2020, 差不多胡先生</rights>
+    <rights>All rights reserved 2020, 程序员老胡</rights>
     <entry>
         <title type="html"><![CDATA[Gradle与插件的升级-5.4.1排坑之旅]]></title>
-        <id>https://Mozziehh.github.io/post/gradle-yu-cha-jian-de-sheng-ji-541-pai-keng-zhi-lu</id>
-        <link href="https://Mozziehh.github.io/post/gradle-yu-cha-jian-de-sheng-ji-541-pai-keng-zhi-lu">
+        <id>https://Mozziehh.github.io/post/gradle-yu-cha-jian-de-sheng-ji-541-pai-keng-zhi-lu/</id>
+        <link href="https://Mozziehh.github.io/post/gradle-yu-cha-jian-de-sheng-ji-541-pai-keng-zhi-lu/">
         </link>
         <updated>2020-02-11T02:18:18.000Z</updated>
         <summary type="html"><![CDATA[<p>2020年来了，一年一度的升级活动又要如期展开了，项目里面的老东西也该改进改进了。随着项目越来越大，编译时间成为了我们的瓶颈，虽然改变工程结构等方式能够提升编译速度，但是升级Gradle其实是不二法门。</p>
@@ -48,15 +48,15 @@ gradle插件：3.5.3</p>
 <p>#升级Android Studio</p>
 <p>首先，要升级一下Android Studio：Android Studio -&gt; check for updates...<br>
 点击之后就会出现让你升级的按钮，耐心的等一会：<br>
-<img src="https://Mozziehh.github.io/post-images/1581424536552.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1581424536552.png" alt="" loading="lazy"></p>
 <p>升级的过程中会报错，如果不继续就无法继续升级，好吧：<br>
-<img src="https://Mozziehh.github.io/post-images/1581424635886.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1581424635886.png" alt="" loading="lazy"></p>
 <p>升级完成之后效果：<br>
-<img src="https://Mozziehh.github.io/post-images/1581424849282.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1581424849282.png" alt="" loading="lazy"></p>
 <p>重启之后就是漫长的等待，没事，它等待它的，我们看看这Android Studio 3.5都干了啥：</p>
 <p>##推荐内存设置</p>
 <p>现在，如果 Android Studio 检测到您可以通过增加操作系统应该为 Android Studio 进程（例如核心 IDE、Gradle 守护进程和 Kotlin 守护进程）分配的 RAM 上限来提高性能，它会通知您。您可以通过点击通知中的操作链接来接受推荐设置，或者，您可以通过以下方式手动调整这些设置：依次选择 File &gt; Settings（或者，在 macOS 上依次选择 Android Studio &gt; Preferences），然后在 Appearance &amp; Behavior &gt; System Settings 下找到 Memory Settings 部分。<br>
-<img src="https://Mozziehh.github.io/post-images/1581425138056.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1581425138056.png" alt="" loading="lazy"></p>
 <p>##内存使用情况报告<br>
 Android Studio 中的内存问题有时难以重现和报告。为了解决此问题，您可以在 Android Studio 中从菜单栏依次点击 Help &gt; Analyze Memory Usage，生成内存使用情况报告。执行此操作后，Android Studio 会在本地清理掉数据中的个人信息，然后询问您是否希望将数据发送给 Android Studio 团队以帮助识别内存问题的来源。<br>
 PS：不过这个功能对开发而言好像没啥用。</p>
@@ -65,27 +65,34 @@ Android Studio 现在会自动检查某些项目目录是否已从实时防病�
 PS：Mac表示没有此类困扰</p>
 <p>##Apply Changes：<br>
 借助 Apply Changes，您可以将代码和资源更改推送给正在运行的应用，而无需重启应用（在某些情况下，甚至无需重启当前的 Activity）。Apply Changes 实现了一种全新的方法来保持应用的状态。与重写 APK 字节码的 Instant Run 不同，Apply Changes 会利用 Android 8.0（API 级别 26）或更高版本中支持的运行时插桩，实时地重新定义类。<br>
-<img src="https://Mozziehh.github.io/post-images/1581425288637.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1581425288637.png" alt="" loading="lazy"></p>
 <p>##Layout Editor<br>
 Android Studio 3.5 对布局可视化、管理和互动功能进行了多项改进。</p>
 <p>使用 ConstraintLayout 时，Attributes 面板中新的 Constraints 部分会列出所选界面组件的约束关系。您可以从设计图面或约束列表中选择一个约束条件，突出显示这两个区域中的约束条件。</p>
-<p><img src="https://Mozziehh.github.io/post-images/1581425465223.png" alt=""><br>
+<p><img src="https://Mozziehh.github.io/post-images/1581425465223.png" alt="" loading="lazy"><br>
 同样，您现在可以选择某个约束条件并按 Delete 键，删除约束条件。您还可以按住 Control 键（在 macOS 上，按住 Command）并点击约束条件定位点来删除约束条件。请注意，当您按住 Control 或 Command 键并将鼠标悬停在定位点上时，任何关联的约束条件都会变成红色，表示您可以点击以将其删除。</p>
 <p>选择视图后，您可以点击 Attributes 面板的 Constraint Widget 部分的任何一个 + 图标来创建约束条件，如下图所示。当您创建新的约束条件时，Layout Editor 现在会选择并突出显示该约束条件，为您刚刚添加的约束条件提供即时视觉反馈。<br>
-<img src="https://Mozziehh.github.io/post-images/1581425489275.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1581425489275.png" alt="" loading="lazy"></p>
 <p>##NDK 并排版本<br>
 现在，您可以并排使用 NDK 的多个版本。此功能可让您更灵活地配置项目，例如，如果项目在同一计算机上使用了不同版本的 NDK。</p>
 <p>如果您的项目使用 Android Gradle 插件 3.5.0 或更高版本，您还可以指定项目中每个模块应使用的 NDK 版本。您可以使用此功能来创建可重现的构建版本，并缓解 NDK 版本与 Android Gradle 插件之间的不兼容性。</p>
 <p>#升级Gradle和Gradle插件</p>
 <p>升级跟砍传奇一样，只有你升级了之后才之后哪些是报错，哪些不是报错，报错了一个一个解决，都解决完成，升级完成。</p>
-<p>##报错一：<br>
+<p>##报错一<br>
 ERROR: Unable to resolve dependency for ':58WuxianClient@wubaDebug/compileClasspath': Could not resolve com.anjuke.mobile:sign:1.1.2-SNAPSHOT.</p>
+<p>##报错二<br>
+WARNING: The following project options are deprecated and have been removed:<br>
+android.useDeprecatedNdk<br>
+NdkCompile is no longer supported</p>
+<p>解决：<br>
+查看配置文件，发现我们配置了：android.useDeprecatedNdk=true，所以直接去掉就行了，编译器会自动帮我们做。</p>
+<h2 id=""></h2>
 ]]></content>
     </entry>
     <entry>
         <title type="html"><![CDATA[android开源框架分析系列之-EventBus]]></title>
-        <id>https://Mozziehh.github.io/post/eventbuszen-me-jiu-xue-bu-ming-bai-ni</id>
-        <link href="https://Mozziehh.github.io/post/eventbuszen-me-jiu-xue-bu-ming-bai-ni">
+        <id>https://Mozziehh.github.io/post/eventbuszen-me-jiu-xue-bu-ming-bai-ni/</id>
+        <link href="https://Mozziehh.github.io/post/eventbuszen-me-jiu-xue-bu-ming-bai-ni/">
         </link>
         <updated>2020-02-10T14:01:54.000Z</updated>
         <summary type="html"><![CDATA[<p>最近在看开源框架，对于经常使用的EventBus，觉得用起来非常简单，所以比较好奇，看了几篇文章。然后把EventBus的关键点提取到了Anki上，随着时间的推移，突然发现印象越来越模糊，反反复复的看光是看理论印象还是不够深刻。于是，打算深挖一下EventBus的源码。</p>
@@ -150,15 +157,69 @@ public static EventBus getDefault() {
         }
         return instance;
 }
+
+这里面还有一个小技巧：
+/**
+ * Creates a new EventBus instance; each instance is a separate scope in which events are delivered. To use a
+ * central bus, consider {@link #getDefault()}.
+ */
+public EventBus() {
+    this(DEFAULT_BUILDER);
+}
+
+public static EventBusBuilder builder() {
+    return new EventBusBuilder();
+}
+发现没，它是在单例的EventBus里面，默认设置了一个EventBusBuilder，通过EventBusBuilder的名字你大概能轻易的猜出来使用了构建者模式，最终返回的这个真正的EventBus。
 </code></pre>
+<p>在得到单例之后，就进行了注册：</p>
+<p>下面就是注册方法：<br>
+注册的时候要注意，首先使用注册就一定要使用反注册，否则，你将会一直收到该消息；然后是一定要为处理该消息的方法进行声明，Subscribe也行，或者是再加上ThreadMode和优先级；</p>
+<pre><code>    public void register(Object subscriber) {
+        Class&lt;?&gt; subscriberClass = subscriber.getClass();
+        List&lt;SubscriberMethod&gt; subscriberMethods = subscriberMethodFinder.findSubscriberMethods(subscriberClass);
+        synchronized (this) {
+            for (SubscriberMethod subscriberMethod : subscriberMethods) {
+                subscribe(subscriber, subscriberMethod);
+            }
+        }
+    }
+</code></pre>
+<p>注册主要分为两步：<br>
+###获取到注册类的所有的声明了Subscribe注解的事件：<br>
+注册的时候，会获取你注册的类对象，然后调用findSubscriberMethods方法，返回List<SubscriberMethod>集合，我们叫做观察者集合（我自己起的名）。<br>
+这里面用到了一个METHOD_CACHE，它是一个ConcurrentHashMap，考考你：什么是ConcurrentHashMap？它是如何使用size()方法如何容器大小的？</p>
+<pre><code>List&lt;SubscriberMethod&gt; findSubscriberMethods(Class&lt;?&gt; subscriberClass) {
+
+        List&lt;SubscriberMethod&gt; subscriberMethods = METHOD_CACHE.get(subscriberClass);
+        //这个地方就是一个设计模式：享元
+        if (subscriberMethods != null) {
+            return subscriberMethods;
+        }
+
+        if (ignoreGeneratedIndex) {
+            subscriberMethods = findUsingReflection(subscriberClass);
+        } else {
+            subscriberMethods = findUsingInfo(subscriberClass);
+        }
+        if (subscriberMethods.isEmpty()) {
+            throw new EventBusException(&quot;Subscriber &quot; + subscriberClass
+                    + &quot; and its super classes have no public methods with the @Subscribe annotation&quot;);
+        } else {
+            METHOD_CACHE.put(subscriberClass, subscriberMethods);
+            return subscriberMethods;
+        }
+    }
+</code></pre>
+<p>然后接下来就是findUsingReflection</p>
 <p>#参考文章<br>
 https://www.jianshu.com/p/f9ae5691e1bb</p>
 ]]></content>
     </entry>
     <entry>
         <title type="html"><![CDATA[Python使用规范]]></title>
-        <id>https://Mozziehh.github.io/post/python-shi-yong-gui-fan</id>
-        <link href="https://Mozziehh.github.io/post/python-shi-yong-gui-fan">
+        <id>https://Mozziehh.github.io/post/python-shi-yong-gui-fan/</id>
+        <link href="https://Mozziehh.github.io/post/python-shi-yong-gui-fan/">
         </link>
         <updated>2020-01-07T06:10:45.000Z</updated>
         <content type="html"><![CDATA[<p>最近一直在写python脚本，马上开源了，发现里面有很多不规范的使用方法，在这里特别记录：</p>
@@ -189,8 +250,8 @@ https://www.jianshu.com/p/f9ae5691e1bb</p>
     </entry>
     <entry>
         <title type="html"><![CDATA[Android开源框架分析系列之-Fresco]]></title>
-        <id>https://Mozziehh.github.io/post/android-kai-yuan-kuang-jia-fen-xi-xi-lie-zhi-fresco</id>
-        <link href="https://Mozziehh.github.io/post/android-kai-yuan-kuang-jia-fen-xi-xi-lie-zhi-fresco">
+        <id>https://Mozziehh.github.io/post/android-kai-yuan-kuang-jia-fen-xi-xi-lie-zhi-fresco/</id>
+        <link href="https://Mozziehh.github.io/post/android-kai-yuan-kuang-jia-fen-xi-xi-lie-zhi-fresco/">
         </link>
         <updated>2019-12-14T02:43:38.000Z</updated>
         <content type="html"><![CDATA[<p>##为什么选择Fresco<br>
@@ -249,7 +310,7 @@ fresco和glide均支持图片的旋转和裁剪。</p>
 <h3 id="代码侵入式">代码侵入式</h3>
 <p>fresco在使用的时候基本都要引入其封装的DraweeView，代码侵入性很强。glide代码侵入性相比不强。</p>
 <p>##Fresco架构<br>
-<img src="https://Mozziehh.github.io/post-images/1576291547391.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1576291547391.png" alt="" loading="lazy"></p>
 <p>DraweeView中成员变量DraweeHolder主要用于控制逻辑层，DraweeHolder包含DraweeHierarchy和DraweeController，DraweeHierarchy用于存储图像，DraweeController用于控制显示图像，为什么把DraweeHierarchy和DraweeController封装到DraweeHolder 中呢？是为了解藕，通过DraweeHolder可以方便的使用这两个组件。DraweeView 把获得的 Event 转发给 Controller，然后 Controller 根据 Event 来决定是否需要显示和隐藏 （包括动画）图像，而这些图像都存储在 Hierarchy 中，最后 DraweeView 绘制时直接通过 getTopLevelDrawable 就可以获取需要显示的图像。</p>
 <p>##Fresco核心显示处理<br>
 看一下DraweeView重写了View的四个方法：<br>
@@ -577,8 +638,8 @@ public void setImageURI(Uri uri, @Nullable Object callerContext) {
     </entry>
     <entry>
         <title type="html"><![CDATA[Java知识体系之-泛型与泛型擦除]]></title>
-        <id>https://Mozziehh.github.io/post/java-zhi-shi-ti-xi-zhi-fan-xing-yu</id>
-        <link href="https://Mozziehh.github.io/post/java-zhi-shi-ti-xi-zhi-fan-xing-yu">
+        <id>https://Mozziehh.github.io/post/java-zhi-shi-ti-xi-zhi-fan-xing-yu/</id>
+        <link href="https://Mozziehh.github.io/post/java-zhi-shi-ti-xi-zhi-fan-xing-yu/">
         </link>
         <updated>2019-12-06T05:59:36.000Z</updated>
         <content type="html"><![CDATA[<p>#Java泛型与进阶<br>
@@ -666,8 +727,8 @@ System.out.println(list1.getClass() == list2.getClass()); // true
     </entry>
     <entry>
         <title type="html"><![CDATA[Android源码阅读系列之-线程池[转]]]></title>
-        <id>https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-xian-cheng-chi-zhuan</id>
-        <link href="https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-xian-cheng-chi-zhuan">
+        <id>https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-xian-cheng-chi-zhuan/</id>
+        <link href="https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-xian-cheng-chi-zhuan/">
         </link>
         <updated>2019-12-05T12:46:45.000Z</updated>
         <content type="html"><![CDATA[<p>#线程池概念<br>
@@ -701,7 +762,7 @@ threadFactory： 用于设置创建线程的工厂，可以给创建的线程设
 handler：  线城池的饱和策略事件，主要有四种类型。</p>
 <p>#任务执行<br>
 线程池执行流程，即对应execute()方法：<br>
-<img src="https://Mozziehh.github.io/post-images/1575550465980.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1575550465980.png" alt="" loading="lazy"></p>
 <p>·提交一个任务，线程池里存活的核心线程数小于线程数corePoolSize时，线程池会创建一个核心线程去处理提交的任务。<br>
 ·如果线程池核心线程数已满，即线程数已经等于corePoolSize，一个新提交的任务，会被放进任务队列workQueue排队等待执行。<br>
 ·当线程池里面存活的线程数已经等于corePoolSize了,并且任务队列workQueue也满，判断线程数是否达·到maximumPoolSize，即最大线程数是否已满，如果没到达，创建一个非核心线程执行提交的任务。<br>
@@ -716,7 +777,7 @@ handler：  线城池的饱和策略事件，主要有四种类型。</p>
 ·非核心线程比作外包员工<br>
 ·阻塞队列比作需求池<br>
 ·提交任务比作提需求</p>
-<figure data-type="image" tabindex="1"><img src="https://Mozziehh.github.io/post-images/1575550700308.png" alt=""></figure>
+<figure data-type="image" tabindex="1"><img src="https://Mozziehh.github.io/post-images/1575550700308.png" alt="" loading="lazy"></figure>
 <p>·当产品提个需求，正式员工（核心线程）先接需求（执行任务）<br>
 ·如果正式员工都有需求在做，(即核心线程数已满），产品就把需求先放需求池（阻塞队列）。<br>
 ·如果需求池(阻塞队列)也满了，但是这时候产品继续提需求,怎么办呢？那就请外包（非核心线程）来做。<br>
@@ -728,7 +789,7 @@ handler：  线城池的饱和策略事件，主要有四种类型。</p>
 <p>在使用线程池处理任务的时候，任务代码可能抛出RuntimeException，抛出异常后，线程池可能捕获它，也可能创建一个新的线程来代替异常的线程，我们可能无法感知任务出现了异常，因此我们需要考虑线程池异常情况。</p>
 <p>#线程池exec.submit(runnable)的执行流程</p>
 <p>通过debug上面有异常的submit方法（建议大家也去debug看一下,图上的每个方法内部是我打断点的地方），处理有异常submit方法的主要执行流程图：</p>
-<figure data-type="image" tabindex="2"><img src="https://Mozziehh.github.io/post-images/1575551509586.png" alt=""></figure>
+<figure data-type="image" tabindex="2"><img src="https://Mozziehh.github.io/post-images/1575551509586.png" alt="" loading="lazy"></figure>
 <p>#线程池的工作队列<br>
 ##线程池都有哪几种工作队列？</p>
 <p>·ArrayBlockingQueue:（有界队列）是一个用数组实现的有界阻塞队列，按FIFO排序量。</p>
@@ -756,7 +817,7 @@ FixedThreadPool 适用于处理CPU密集型的任务，确保CPU在长期被工�
 没有所谓的非空闲时间，即keepAliveTime为0<br>
 阻塞队列为无界队列LinkedBlockingQueue</p>
 <p>####工作机制：<br>
-<img src="https://Mozziehh.github.io/post-images/1575555765273.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1575555765273.png" alt="" loading="lazy"></p>
 <p>####提交任务<br>
 如果线程数少于核心线程，创建核心线程执行任务<br>
 如果线程数等于核心线程，把任务添加到LinkedBlockingQueue阻塞队列<br>
@@ -788,7 +849,7 @@ threadFactory);<br>
 非核心线程空闲存活时间为60秒</p>
 <p>当提交任务的速度大于处理任务的速度时，每次提交一个任务，就必然会创建一个线程。极端情况下会创建过多的线程，耗尽 CPU 和内存资源。由于空闲 60 秒的线程会被终止，长时间保持空闲的 CachedThreadPool 不会占用任何资源。<br>
 工作机制<br>
-<img src="https://Mozziehh.github.io/post-images/1575555947765.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1575555947765.png" alt="" loading="lazy"></p>
 <p>####提交任务<br>
 因为没有核心线程，所以任务直接加到SynchronousQueue队列。<br>
 判断是否有空闲线程，如果有，就去取出任务执行。<br>
@@ -878,7 +939,7 @@ private static final int STOP       =  1 &lt;&lt; COUNT_BITS;<br>
 private static final int TIDYING    =  2 &lt;&lt; COUNT_BITS;<br>
 private static final int TERMINATED =  3 &lt;&lt; COUNT_BITS;<br>
 复制代码线程池各个状态切换图：<br>
-<img src="https://Mozziehh.github.io/post-images/1575556444104.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1575556444104.png" alt="" loading="lazy"></p>
 <p>###RUNNING</p>
 <p>该状态的线程池会接收新任务，并处理阻塞队列中的任务;<br>
 调用线程池的shutdown()方法，可以切换到SHUTDOWN状态;<br>
@@ -900,8 +961,8 @@ terminated()执行完毕，进入TERMINATED状态</p>
     </entry>
     <entry>
         <title type="html"><![CDATA[Android源码阅读系列之-Handler]]></title>
-        <id>https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-handler</id>
-        <link href="https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-handler">
+        <id>https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-handler/</id>
+        <link href="https://Mozziehh.github.io/post/android-yuan-ma-yue-du-xi-lie-zhi-handler/">
         </link>
         <updated>2019-12-05T07:18:07.000Z</updated>
         <content type="html"><![CDATA[<p>##概述<br>
@@ -1276,8 +1337,8 @@ Handler负责发送消息和处理消息，Message就是那个消息，通过obt
     </entry>
     <entry>
         <title type="html"><![CDATA[GifView在android的应用指南]]></title>
-        <id>https://Mozziehh.github.io/post/gifview-zai-android-de-ying-yong-zhi-nan</id>
-        <link href="https://Mozziehh.github.io/post/gifview-zai-android-de-ying-yong-zhi-nan">
+        <id>https://Mozziehh.github.io/post/gifview-zai-android-de-ying-yong-zhi-nan/</id>
+        <link href="https://Mozziehh.github.io/post/gifview-zai-android-de-ying-yong-zhi-nan/">
         </link>
         <updated>2019-11-22T00:48:04.000Z</updated>
         <content type="html"><![CDATA[<p>##背景<br>
@@ -1791,8 +1852,8 @@ Demo里面还有很多的异常边界情况没有考虑，比如各类的容错�
     </entry>
     <entry>
         <title type="html"><![CDATA[通过NDK实现Zxing二维码扫描放大功能]]></title>
-        <id>https://Mozziehh.github.io/post/tong-guo-ndk-shi-xian-zxing-er-wei-ma-sao-miao-fang-da-gong-neng</id>
-        <link href="https://Mozziehh.github.io/post/tong-guo-ndk-shi-xian-zxing-er-wei-ma-sao-miao-fang-da-gong-neng">
+        <id>https://Mozziehh.github.io/post/tong-guo-ndk-shi-xian-zxing-er-wei-ma-sao-miao-fang-da-gong-neng/</id>
+        <link href="https://Mozziehh.github.io/post/tong-guo-ndk-shi-xian-zxing-er-wei-ma-sao-miao-fang-da-gong-neng/">
         </link>
         <updated>2019-11-22T00:43:25.000Z</updated>
         <content type="html"><![CDATA[<p> 在各个APP中几乎都能看见它的身影。二维码扫描虽然是一个普通的功能，但是在APP中占依然都放在很抢眼的位置。比如像淘宝、58这类APP主要解决PC端扫码登录，微信、支付宝这类主要使用支付，摩拜小蓝这类APP主要是用于扫码骑车。所以，能更快捷更方便的使用二维码，可以极大的提升用户体验。</p>
@@ -1803,7 +1864,7 @@ Demo里面还有很多的异常边界情况没有考虑，比如各类的容错�
  是的，在这个寒冷的夜，为了能让你的手机更快速的识别出对方的二维码，我们做了很多。</p>
 <p>##二维码解读</p>
 <p>我们来看一下二维码扫描主要展示信息，主要分为功能图形和编码区格式。其中功能图形的位置探测图形、定位图形、矫正图形在定位的过程中起着举足轻重的地位。</p>
-<figure data-type="image" tabindex="1"><img src="https://github.com/Mozziehh/mypapers/blob/master/images/qrcode_structure.png?raw=true" alt=""></figure>
+<figure data-type="image" tabindex="1"><img src="https://github.com/Mozziehh/mypapers/blob/master/images/qrcode_structure.png?raw=true" alt="" loading="lazy"></figure>
 <p>##二维码扫描的源码解读<br>
  从你拿出手机对准二维码直到扫描结束，整个过程都发生了什么？为了能让你生动的了解整个过程，我打算用下面的方式讲：<br>
 打开相机执行扫描-&gt;获取Byte流-&gt;灰度-&gt;二值化-&gt;霍夫变换-&gt;找到二维码定位点-&gt;识别-&gt;返回结果。</p>
@@ -1838,7 +1899,7 @@ Demo里面还有很多的异常边界情况没有考虑，比如各类的容错�
 </code></pre>
 <p>###设置支持的二维码类型</p>
 <p>目前二维码支持如下类型：<br>
-<img src="https://i.loli.net/2019/06/17/5d0734bfd44a794589.png" alt="support-zxing-pic.png"><br>
+<img src="https://i.loli.net/2019/06/17/5d0734bfd44a794589.png" alt="support-zxing-pic.png" loading="lazy"><br>
 代码在这里配置：</p>
 <pre><code>// The prefs can't change while the thread is running, so pick them up once here.
     if (decodeFormats == null || decodeFormats.isEmpty()) {
@@ -2206,7 +2267,7 @@ BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 事实上，网上也有很多例子是这么做的。<br>
 行，既然已经有了，那我们直接拿来用就可以了吧？<br>
 NONONO，事情并不是那么简单：<br>
-<img src="https://i.loli.net/2019/06/17/5d0758dd0179c16484.png" alt="bucunzai.png"></p>
+<img src="https://i.loli.net/2019/06/17/5d0758dd0179c16484.png" alt="bucunzai.png" loading="lazy"></p>
 <p>##58APP二维码扫描的应用<br>
 因为58APP，用的不是Java实现的。核心解码流程使用的是C++，通过JNI编译生成的so，然后再打入到58APP里的。<br>
 兵来将挡水来土掩，行，既然java实现的思路已经有了，我们就用C++再写一遍怎么了，谁让咱也是科班出身。</p>
@@ -2293,15 +2354,15 @@ NONONO，事情并不是那么简单：<br>
 </code></pre>
 <p>###导出so，打入58APP<br>
 最后，在demo中运行一下，看看效果。<br>
-<img src="https://i.loli.net/2019/06/17/5d077e8e60ec060459.gif" alt="1557793019816360 (1).gif"></p>
+<img src="https://i.loli.net/2019/06/17/5d077e8e60ec060459.gif" alt="1557793019816360 (1).gif" loading="lazy"></p>
 <p>##心得<br>
 其实最终解决这个问题不难，重点在于发现问题，解决问题的过程学到了什么。</p>
 ]]></content>
     </entry>
     <entry>
         <title type="html"><![CDATA[手把手教你如何不刷机Hook代码]]></title>
-        <id>https://Mozziehh.github.io/post/shou-ba-shou-jiao-ni-ru-he-bu-shua-ji-hook-dai-ma</id>
-        <link href="https://Mozziehh.github.io/post/shou-ba-shou-jiao-ni-ru-he-bu-shua-ji-hook-dai-ma">
+        <id>https://Mozziehh.github.io/post/shou-ba-shou-jiao-ni-ru-he-bu-shua-ji-hook-dai-ma/</id>
+        <link href="https://Mozziehh.github.io/post/shou-ba-shou-jiao-ni-ru-he-bu-shua-ji-hook-dai-ma/">
         </link>
         <updated>2019-11-22T00:39:38.000Z</updated>
         <content type="html"><![CDATA[<p>##1. 背景</p>

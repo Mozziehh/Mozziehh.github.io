@@ -2,9 +2,9 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>通过NDK实现Zxing二维码扫描放大功能 | 差不多胡先生</title>
+<title>通过NDK实现Zxing二维码扫描放大功能 | 程序员老胡</title>
 <meta name="description" content="书山有路勤为径，学海无涯苦作舟" />
-<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1581428225089">
+<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1582005940576">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://Mozziehh.github.io/styles/main.css">
@@ -20,10 +20,10 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://Mozziehh.github.io">
-  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1581428225089" alt="">
+  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1582005940576" alt="">
   </a>
   <h1 class="site-title">
-    差不多胡先生
+    程序员老胡
   </h1>
   <p class="site-description">
     书山有路勤为径，学海无涯苦作舟
@@ -83,7 +83,7 @@
                 16 min read
               </span>
               
-                <a href="https://Mozziehh.github.io/tag/Ls3a6rVaYa" class="post-tag">
+                <a href="https://Mozziehh.github.io/tag/Ls3a6rVaYa/" class="post-tag">
                   # NDK
                 </a>
               
@@ -99,7 +99,7 @@
  是的，在这个寒冷的夜，为了能让你的手机更快速的识别出对方的二维码，我们做了很多。</p>
 <p>##二维码解读</p>
 <p>我们来看一下二维码扫描主要展示信息，主要分为功能图形和编码区格式。其中功能图形的位置探测图形、定位图形、矫正图形在定位的过程中起着举足轻重的地位。</p>
-<figure data-type="image" tabindex="1"><img src="https://github.com/Mozziehh/mypapers/blob/master/images/qrcode_structure.png?raw=true" alt=""></figure>
+<figure data-type="image" tabindex="1"><img src="https://github.com/Mozziehh/mypapers/blob/master/images/qrcode_structure.png?raw=true" alt="" loading="lazy"></figure>
 <p>##二维码扫描的源码解读<br>
  从你拿出手机对准二维码直到扫描结束，整个过程都发生了什么？为了能让你生动的了解整个过程，我打算用下面的方式讲：<br>
 打开相机执行扫描-&gt;获取Byte流-&gt;灰度-&gt;二值化-&gt;霍夫变换-&gt;找到二维码定位点-&gt;识别-&gt;返回结果。</p>
@@ -134,7 +134,7 @@
 </code></pre>
 <p>###设置支持的二维码类型</p>
 <p>目前二维码支持如下类型：<br>
-<img src="https://i.loli.net/2019/06/17/5d0734bfd44a794589.png" alt="support-zxing-pic.png"><br>
+<img src="https://i.loli.net/2019/06/17/5d0734bfd44a794589.png" alt="support-zxing-pic.png" loading="lazy"><br>
 代码在这里配置：</p>
 <pre><code>// The prefs can't change while the thread is running, so pick them up once here.
     if (decodeFormats == null || decodeFormats.isEmpty()) {
@@ -502,7 +502,7 @@ BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
 事实上，网上也有很多例子是这么做的。<br>
 行，既然已经有了，那我们直接拿来用就可以了吧？<br>
 NONONO，事情并不是那么简单：<br>
-<img src="https://i.loli.net/2019/06/17/5d0758dd0179c16484.png" alt="bucunzai.png"></p>
+<img src="https://i.loli.net/2019/06/17/5d0758dd0179c16484.png" alt="bucunzai.png" loading="lazy"></p>
 <p>##58APP二维码扫描的应用<br>
 因为58APP，用的不是Java实现的。核心解码流程使用的是C++，通过JNI编译生成的so，然后再打入到58APP里的。<br>
 兵来将挡水来土掩，行，既然java实现的思路已经有了，我们就用C++再写一遍怎么了，谁让咱也是科班出身。</p>
@@ -589,7 +589,7 @@ NONONO，事情并不是那么简单：<br>
 </code></pre>
 <p>###导出so，打入58APP<br>
 最后，在demo中运行一下，看看效果。<br>
-<img src="https://i.loli.net/2019/06/17/5d077e8e60ec060459.gif" alt="1557793019816360 (1).gif"></p>
+<img src="https://i.loli.net/2019/06/17/5d077e8e60ec060459.gif" alt="1557793019816360 (1).gif" loading="lazy"></p>
 <p>##心得<br>
 其实最终解决这个问题不难，重点在于发现问题，解决问题的过程学到了什么。</p>
 
@@ -615,7 +615,7 @@ NONONO，事情并不是那么简单：<br>
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://Mozziehh.github.io/post/shou-ba-shou-jiao-ni-ru-he-bu-shua-ji-hook-dai-ma">
+            <a href="https://Mozziehh.github.io/post/shou-ba-shou-jiao-ni-ru-he-bu-shua-ji-hook-dai-ma/">
               <h3 class="post-title">
                 手把手教你如何不刷机Hook代码
               </h3>

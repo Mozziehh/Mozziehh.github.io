@@ -2,9 +2,9 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Gradle与插件的升级-5.4.1排坑之旅 | 差不多胡先生</title>
+<title>Gradle与插件的升级-5.4.1排坑之旅 | 程序员老胡</title>
 <meta name="description" content="书山有路勤为径，学海无涯苦作舟" />
-<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1581428225089">
+<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1582005940576">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://Mozziehh.github.io/styles/main.css">
@@ -20,10 +20,10 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://Mozziehh.github.io">
-  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1581428225089" alt="">
+  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1582005940576" alt="">
   </a>
   <h1 class="site-title">
-    差不多胡先生
+    程序员老胡
   </h1>
   <p class="site-description">
     书山有路勤为径，学海无涯苦作舟
@@ -117,15 +117,15 @@ gradle插件：3.5.3</p>
 <p>#升级Android Studio</p>
 <p>首先，要升级一下Android Studio：Android Studio -&gt; check for updates...<br>
 点击之后就会出现让你升级的按钮，耐心的等一会：<br>
-<img src="https://Mozziehh.github.io/post-images/1581424536552.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1581424536552.png" alt="" loading="lazy"></p>
 <p>升级的过程中会报错，如果不继续就无法继续升级，好吧：<br>
-<img src="https://Mozziehh.github.io/post-images/1581424635886.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1581424635886.png" alt="" loading="lazy"></p>
 <p>升级完成之后效果：<br>
-<img src="https://Mozziehh.github.io/post-images/1581424849282.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1581424849282.png" alt="" loading="lazy"></p>
 <p>重启之后就是漫长的等待，没事，它等待它的，我们看看这Android Studio 3.5都干了啥：</p>
 <p>##推荐内存设置</p>
 <p>现在，如果 Android Studio 检测到您可以通过增加操作系统应该为 Android Studio 进程（例如核心 IDE、Gradle 守护进程和 Kotlin 守护进程）分配的 RAM 上限来提高性能，它会通知您。您可以通过点击通知中的操作链接来接受推荐设置，或者，您可以通过以下方式手动调整这些设置：依次选择 File &gt; Settings（或者，在 macOS 上依次选择 Android Studio &gt; Preferences），然后在 Appearance &amp; Behavior &gt; System Settings 下找到 Memory Settings 部分。<br>
-<img src="https://Mozziehh.github.io/post-images/1581425138056.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1581425138056.png" alt="" loading="lazy"></p>
 <p>##内存使用情况报告<br>
 Android Studio 中的内存问题有时难以重现和报告。为了解决此问题，您可以在 Android Studio 中从菜单栏依次点击 Help &gt; Analyze Memory Usage，生成内存使用情况报告。执行此操作后，Android Studio 会在本地清理掉数据中的个人信息，然后询问您是否希望将数据发送给 Android Studio 团队以帮助识别内存问题的来源。<br>
 PS：不过这个功能对开发而言好像没啥用。</p>
@@ -134,25 +134,39 @@ Android Studio 现在会自动检查某些项目目录是否已从实时防病�
 PS：Mac表示没有此类困扰</p>
 <p>##Apply Changes：<br>
 借助 Apply Changes，您可以将代码和资源更改推送给正在运行的应用，而无需重启应用（在某些情况下，甚至无需重启当前的 Activity）。Apply Changes 实现了一种全新的方法来保持应用的状态。与重写 APK 字节码的 Instant Run 不同，Apply Changes 会利用 Android 8.0（API 级别 26）或更高版本中支持的运行时插桩，实时地重新定义类。<br>
-<img src="https://Mozziehh.github.io/post-images/1581425288637.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1581425288637.png" alt="" loading="lazy"></p>
 <p>##Layout Editor<br>
 Android Studio 3.5 对布局可视化、管理和互动功能进行了多项改进。</p>
 <p>使用 ConstraintLayout 时，Attributes 面板中新的 Constraints 部分会列出所选界面组件的约束关系。您可以从设计图面或约束列表中选择一个约束条件，突出显示这两个区域中的约束条件。</p>
-<p><img src="https://Mozziehh.github.io/post-images/1581425465223.png" alt=""><br>
+<p><img src="https://Mozziehh.github.io/post-images/1581425465223.png" alt="" loading="lazy"><br>
 同样，您现在可以选择某个约束条件并按 Delete 键，删除约束条件。您还可以按住 Control 键（在 macOS 上，按住 Command）并点击约束条件定位点来删除约束条件。请注意，当您按住 Control 或 Command 键并将鼠标悬停在定位点上时，任何关联的约束条件都会变成红色，表示您可以点击以将其删除。</p>
 <p>选择视图后，您可以点击 Attributes 面板的 Constraint Widget 部分的任何一个 + 图标来创建约束条件，如下图所示。当您创建新的约束条件时，Layout Editor 现在会选择并突出显示该约束条件，为您刚刚添加的约束条件提供即时视觉反馈。<br>
-<img src="https://Mozziehh.github.io/post-images/1581425489275.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1581425489275.png" alt="" loading="lazy"></p>
 <p>##NDK 并排版本<br>
 现在，您可以并排使用 NDK 的多个版本。此功能可让您更灵活地配置项目，例如，如果项目在同一计算机上使用了不同版本的 NDK。</p>
 <p>如果您的项目使用 Android Gradle 插件 3.5.0 或更高版本，您还可以指定项目中每个模块应使用的 NDK 版本。您可以使用此功能来创建可重现的构建版本，并缓解 NDK 版本与 Android Gradle 插件之间的不兼容性。</p>
 <p>#升级Gradle和Gradle插件</p>
 <p>升级跟砍传奇一样，只有你升级了之后才之后哪些是报错，哪些不是报错，报错了一个一个解决，都解决完成，升级完成。</p>
-<p>##报错一：<br>
+<p>##报错一<br>
 ERROR: Unable to resolve dependency for ':58WuxianClient@wubaDebug/compileClasspath': Could not resolve com.anjuke.mobile:sign:1.1.2-SNAPSHOT.</p>
+<p>##报错二<br>
+WARNING: The following project options are deprecated and have been removed:<br>
+android.useDeprecatedNdk<br>
+NdkCompile is no longer supported</p>
+<p>解决：<br>
+查看配置文件，发现我们配置了：android.useDeprecatedNdk=true，所以直接去掉就行了，编译器会自动帮我们做。</p>
+<h2 id=""></h2>
 
               </div>
               <div class="toc-container">
-                
+                <ul class="markdownIt-TOC">
+<li>
+<ul>
+<li></li>
+</ul>
+</li>
+</ul>
+
               </div>
             </div>
           </article>
@@ -161,7 +175,7 @@ ERROR: Unable to resolve dependency for ':58WuxianClient@wubaDebug/compileClassp
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://Mozziehh.github.io/post/eventbuszen-me-jiu-xue-bu-ming-bai-ni">
+            <a href="https://Mozziehh.github.io/post/eventbuszen-me-jiu-xue-bu-ming-bai-ni/">
               <h3 class="post-title">
                 android开源框架分析系列之-EventBus
               </h3>

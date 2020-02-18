@@ -2,9 +2,9 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Android开源框架分析系列之-Fresco | 差不多胡先生</title>
+<title>Android开源框架分析系列之-Fresco | 程序员老胡</title>
 <meta name="description" content="书山有路勤为径，学海无涯苦作舟" />
-<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1581428225089">
+<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1582005940576">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://Mozziehh.github.io/styles/main.css">
@@ -20,10 +20,10 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://Mozziehh.github.io">
-  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1581428225089" alt="">
+  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1582005940576" alt="">
   </a>
   <h1 class="site-title">
-    差不多胡先生
+    程序员老胡
   </h1>
   <p class="site-description">
     书山有路勤为径，学海无涯苦作舟
@@ -83,11 +83,11 @@
                 17 min read
               </span>
               
-                <a href="https://Mozziehh.github.io/tag/S04Qxg07W" class="post-tag">
+                <a href="https://Mozziehh.github.io/tag/S04Qxg07W/" class="post-tag">
                   # Fresco
                 </a>
               
-                <a href="https://Mozziehh.github.io/tag/IM_UjSAcF" class="post-tag">
+                <a href="https://Mozziehh.github.io/tag/IM_UjSAcF/" class="post-tag">
                   # Android
                 </a>
               
@@ -151,7 +151,7 @@ fresco和glide均支持图片的旋转和裁剪。</p>
 <h3 id="代码侵入式">代码侵入式</h3>
 <p>fresco在使用的时候基本都要引入其封装的DraweeView，代码侵入性很强。glide代码侵入性相比不强。</p>
 <p>##Fresco架构<br>
-<img src="https://Mozziehh.github.io/post-images/1576291547391.png" alt=""></p>
+<img src="https://Mozziehh.github.io/post-images/1576291547391.png" alt="" loading="lazy"></p>
 <p>DraweeView中成员变量DraweeHolder主要用于控制逻辑层，DraweeHolder包含DraweeHierarchy和DraweeController，DraweeHierarchy用于存储图像，DraweeController用于控制显示图像，为什么把DraweeHierarchy和DraweeController封装到DraweeHolder 中呢？是为了解藕，通过DraweeHolder可以方便的使用这两个组件。DraweeView 把获得的 Event 转发给 Controller，然后 Controller 根据 Event 来决定是否需要显示和隐藏 （包括动画）图像，而这些图像都存储在 Hierarchy 中，最后 DraweeView 绘制时直接通过 getTopLevelDrawable 就可以获取需要显示的图像。</p>
 <p>##Fresco核心显示处理<br>
 看一下DraweeView重写了View的四个方法：<br>
@@ -499,7 +499,7 @@ public void setImageURI(Uri uri, @Nullable Object callerContext) {
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://Mozziehh.github.io/post/java-zhi-shi-ti-xi-zhi-fan-xing-yu">
+            <a href="https://Mozziehh.github.io/post/java-zhi-shi-ti-xi-zhi-fan-xing-yu/">
               <h3 class="post-title">
                 Java知识体系之-泛型与泛型擦除
               </h3>

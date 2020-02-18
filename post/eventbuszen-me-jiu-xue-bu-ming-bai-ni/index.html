@@ -2,9 +2,9 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>android开源框架分析系列之-EventBus | 差不多胡先生</title>
+<title>android开源框架分析系列之-EventBus | 程序员老胡</title>
 <meta name="description" content="书山有路勤为径，学海无涯苦作舟" />
-<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1581428225089">
+<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1582005940576">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://Mozziehh.github.io/styles/main.css">
@@ -20,10 +20,10 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://Mozziehh.github.io">
-  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1581428225089" alt="">
+  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1582005940576" alt="">
   </a>
   <h1 class="site-title">
-    差不多胡先生
+    程序员老胡
   </h1>
   <p class="site-description">
     书山有路勤为径，学海无涯苦作舟
@@ -80,7 +80,7 @@
                 2020-02-10
               </span>
               <span>
-                2 min read
+                4 min read
               </span>
               
             </div>
@@ -147,7 +147,61 @@ public static EventBus getDefault() {
         }
         return instance;
 }
+
+这里面还有一个小技巧：
+/**
+ * Creates a new EventBus instance; each instance is a separate scope in which events are delivered. To use a
+ * central bus, consider {@link #getDefault()}.
+ */
+public EventBus() {
+    this(DEFAULT_BUILDER);
+}
+
+public static EventBusBuilder builder() {
+    return new EventBusBuilder();
+}
+发现没，它是在单例的EventBus里面，默认设置了一个EventBusBuilder，通过EventBusBuilder的名字你大概能轻易的猜出来使用了构建者模式，最终返回的这个真正的EventBus。
 </code></pre>
+<p>在得到单例之后，就进行了注册：</p>
+<p>下面就是注册方法：<br>
+注册的时候要注意，首先使用注册就一定要使用反注册，否则，你将会一直收到该消息；然后是一定要为处理该消息的方法进行声明，Subscribe也行，或者是再加上ThreadMode和优先级；</p>
+<pre><code>    public void register(Object subscriber) {
+        Class&lt;?&gt; subscriberClass = subscriber.getClass();
+        List&lt;SubscriberMethod&gt; subscriberMethods = subscriberMethodFinder.findSubscriberMethods(subscriberClass);
+        synchronized (this) {
+            for (SubscriberMethod subscriberMethod : subscriberMethods) {
+                subscribe(subscriber, subscriberMethod);
+            }
+        }
+    }
+</code></pre>
+<p>注册主要分为两步：<br>
+###获取到注册类的所有的声明了Subscribe注解的事件：<br>
+注册的时候，会获取你注册的类对象，然后调用findSubscriberMethods方法，返回List<SubscriberMethod>集合，我们叫做观察者集合（我自己起的名）。<br>
+这里面用到了一个METHOD_CACHE，它是一个ConcurrentHashMap，考考你：什么是ConcurrentHashMap？它是如何使用size()方法如何容器大小的？</p>
+<pre><code>List&lt;SubscriberMethod&gt; findSubscriberMethods(Class&lt;?&gt; subscriberClass) {
+
+        List&lt;SubscriberMethod&gt; subscriberMethods = METHOD_CACHE.get(subscriberClass);
+        //这个地方就是一个设计模式：享元
+        if (subscriberMethods != null) {
+            return subscriberMethods;
+        }
+
+        if (ignoreGeneratedIndex) {
+            subscriberMethods = findUsingReflection(subscriberClass);
+        } else {
+            subscriberMethods = findUsingInfo(subscriberClass);
+        }
+        if (subscriberMethods.isEmpty()) {
+            throw new EventBusException(&quot;Subscriber &quot; + subscriberClass
+                    + &quot; and its super classes have no public methods with the @Subscribe annotation&quot;);
+        } else {
+            METHOD_CACHE.put(subscriberClass, subscriberMethods);
+            return subscriberMethods;
+        }
+    }
+</code></pre>
+<p>然后接下来就是findUsingReflection</p>
 <p>#参考文章<br>
 https://www.jianshu.com/p/f9ae5691e1bb</p>
 
@@ -162,7 +216,7 @@ https://www.jianshu.com/p/f9ae5691e1bb</p>
         
           <div class="next-post">
             <div class="next">下一篇</div>
-            <a href="https://Mozziehh.github.io/post/python-shi-yong-gui-fan">
+            <a href="https://Mozziehh.github.io/post/python-shi-yong-gui-fan/">
               <h3 class="post-title">
                 Python使用规范
               </h3>
