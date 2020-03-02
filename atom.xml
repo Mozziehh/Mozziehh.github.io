@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://Mozziehh.github.io</id>
-    <title>老胡</title>
-    <updated>2020-03-02T05:10:21.516Z</updated>
+    <title>mozzie</title>
+    <updated>2020-03-02T05:10:50.276Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://Mozziehh.github.io"/>
     <link rel="self" href="https://Mozziehh.github.io/atom.xml"/>
     <subtitle>书山有路勤为径，学海无涯苦作舟</subtitle>
     <logo>https://Mozziehh.github.io/images/avatar.png</logo>
     <icon>https://Mozziehh.github.io/favicon.ico</icon>
-    <rights>All rights reserved 2020, 老胡</rights>
+    <rights>All rights reserved 2020, mozzie</rights>
     <entry>
         <title type="html"><![CDATA[Gradle与插件的升级-5.4.1排坑之旅]]></title>
         <id>https://Mozziehh.github.io/post/gradle-yu-cha-jian-de-sheng-ji-541-pai-keng-zhi-lu/</id>
