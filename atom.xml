@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://Mozziehh.github.io</id>
     <title>程序员老胡</title>
-    <updated>2020-02-18T06:05:45.266Z</updated>
+    <updated>2020-03-02T05:07:47.029Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://Mozziehh.github.io"/>
     <link rel="self" href="https://Mozziehh.github.io/atom.xml"/>
@@ -27,23 +27,415 @@ gradle插件：3.3.1<br>
 首次执行编译时间（执行命令-&gt; ./gradlew assembleDebug）：9m 17s<br>
 第二次执行编译时间： 6m 18s</p>
 <p>以下是来自官网的数据：<br>
-插件版本	          所需的 Gradle 版本<br>
-1.0.0 - 1.1.3	     2.2.1 - 2.3<br>
-1.2.0 - 1.3.1	     2.2.1 - 2.9<br>
-1.5.0	             2.2.1 - 2.13<br>
-2.0.0 - 2.1.2	     2.10 - 2.13<br>
-2.1.3 - 2.2.3	     2.14.1+<br>
-2.3.0+	             3.3+<br>
-3.0.0+	             4.1+<br>
-3.1.0+	             4.4+<br>
-3.2.0 - 3.2.1	     4.6+<br>
-3.3.0 - 3.3.2	     4.10.1+<br>
-3.4.0 - 3.4.1	     5.1.1+<br>
-3.5.0+	             5.4.1-5.6.4</p>
+插件版本              所需的 Gradle 版本<br>
+1.0.0 - 1.1.3        2.2.1 - 2.3<br>
+1.2.0 - 1.3.1        2.2.1 - 2.9<br>
+1.5.0                2.2.1 - 2.13<br>
+2.0.0 - 2.1.2        2.10 - 2.13<br>
+2.1.3 - 2.2.3        2.14.1+<br>
+2.3.0+               3.3+<br>
+3.0.0+               4.1+<br>
+3.1.0+               4.4+<br>
+3.2.0 - 3.2.1        4.6+<br>
+3.3.0 - 3.3.2        4.10.1+<br>
+3.4.0 - 3.4.1        5.1.1+<br>
+3.5.0+               5.4.1-5.6.4</p>
 <p>预计更新为：<br>
 android studio : 3.5.0（必须）<br>
 gradle : 5.4.1<br>
-gradle插件：3.5.3</p>
+gradle插件：3.5.3<br>
+SDK Build Tools： 28.0.3 +</p>
+<p>#影响范围<br>
+根据下文的初步调研，这里给出影响范围，以备参考：<br>
+##整体升级计划</p>
+<table>
+<thead>
+<tr>
+<th>升级</th>
+<th>具体内容</th>
+<th>升级收益</th>
+<th>是否影响到安居客</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Android Studio</td>
+<td>升级到3.5</td>
+<td>系统运行状况、功能完善和错误修复，参考《Android Studio升级表》</td>
+<td>是，需要同步升级</td>
+</tr>
+<tr>
+<td>Gradle</td>
+<td>升级5.4.1</td>
+<td>优化语法，使用R8提升编译速度，参考《Gradle升级表》</td>
+<td>是，需要同步升级</td>
+</tr>
+<tr>
+<td>Gradle 插件</td>
+<td>升级3.5.3</td>
+<td>同上，配套使用</td>
+<td>是，需要同步升级</td>
+</tr>
+<tr>
+<td>SDK Build Tools</td>
+<td>28.0.3 +</td>
+<td>同上，配套使用</td>
+<td>是，需要同步升级</td>
+</tr>
+<tr>
+<td>JDK</td>
+<td>1.8</td>
+<td>同上，配套使用</td>
+<td>是，需要同步升级</td>
+</tr>
+<tr>
+<td>Kotlin Gradle 插件</td>
+<td>1.3.40</td>
+<td>同上，配套使用</td>
+<td>是，需要同步升级</td>
+</tr>
+</tbody>
+</table>
+<p>##Android Studio升级表</p>
+<table>
+<thead>
+<tr>
+<th>升级</th>
+<th>具体内容</th>
+<th>升级收益</th>
+<th>备注</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>增量注释</td>
+<td>数据绑定注释处理器支持增量注释处理</td>
+<td>提高了增量构建的性能</td>
+<td>暂时用不到</td>
+</tr>
+<tr>
+<td>单元测试</td>
+<td>可缓存的单元测试</td>
+<td>提效</td>
+<td>暂时用不到</td>
+</tr>
+<tr>
+<td>推荐内存设置</td>
+<td>手动分配RAM上限</td>
+<td>提高性能</td>
+<td>开发者根据需要自己设置</td>
+</tr>
+<tr>
+<td>内存使用情况报告</td>
+<td>提交内存使用报告</td>
+<td>供goolge完成内存分析</td>
+<td>开发者根据需要自己设置</td>
+</tr>
+<tr>
+<td>Windows：防病毒文件 I/O 优化</td>
+<td>防病毒检测</td>
+<td>防止病毒侵害</td>
+<td>无win，不用</td>
+</tr>
+<tr>
+<td>Apply Changes</td>
+<td>将代码和资源更改推送给正在运行的应用</td>
+<td>无需重复构建</td>
+<td>需要运行在Android 8.0及更高</td>
+</tr>
+<tr>
+<td>Layout Editor</td>
+<td>对布局可视化、管理和互动功能</td>
+<td>ConstraintLayout构建布局时会更方便</td>
+<td>升级即可使用</td>
+</tr>
+<tr>
+<td>NDK 并排版本</td>
+<td>同一计算机上可以使用不同版本的 NDK，甚至可以指定项目中每个模块应使用的 NDK 版本</td>
+<td>并行构建</td>
+<td>开发者可用</td>
+</tr>
+</tbody>
+</table>
+<p>##Gradle升级表</p>
+<table>
+<thead>
+<tr>
+<th>升级</th>
+<th>具体内容</th>
+<th>升级收益</th>
+<th>是否影响到安居客</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>默认标签</td>
+<td>不再需要enableFeaturePreview('IMPROVED_POM_SUPPORT')和enableFeaturePreview('STABLE_PUBLISHING')标志</td>
+<td>自动配置</td>
+<td>是，若有，则找到对应代码并删除</td>
+</tr>
+<tr>
+<td>Java 9 &amp; JAXB</td>
+<td>默认捆绑</td>
+<td>自动配置</td>
+<td>是，若有，则找到对应代码并删除</td>
+</tr>
+<tr>
+<td>语法修改</td>
+<td>publishing {}不支持延时操作</td>
+<td>使用afterEvaluate {}</td>
+<td>是，若有，则找到对应代码并删除</td>
+</tr>
+<tr>
+<td>Java库分发插件</td>
+<td>基于Java库插件而不是Java插件</td>
+<td>使其行为略有不同</td>
+<td>是，若有，则请确保在升级后检查内部版本是否符合预期</td>
+</tr>
+<tr>
+<td>Java库分发插件</td>
+<td>基于Java库插件而不是Java插件</td>
+<td>使其行为略有不同</td>
+<td>是，若有，则请确保在升级后检查内部版本是否符合预期</td>
+</tr>
+<tr>
+<td>属性修改</td>
+<td>CheckstyleReport和FindBugsReport的html属性现在返回一个CustomizableHtmlReport实例</td>
+<td>更易于从静态类型的语言（如Java和Kotlin）进行配置</td>
+<td>是，若有，则请确保在升级后检查是否符合预期</td>
+</tr>
+<tr>
+<td>语法修改</td>
+<td>&lt;&lt;对于任务定义不再有效</td>
+<td>不能使用语法task myTask &lt;&lt; { … } ，改用Task.doLast（）</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>语法修改</td>
+<td>域对象名称使用规范</td>
+<td>不能使用<space> / \ : &lt; &gt; &quot; ? * .作为项目和任务名称，也不能将.用作开头或结尾字符</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>语法修改</td>
+<td>-Dtest.single</td>
+<td>命令行删除，使用test filtering替代</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>语法修改</td>
+<td>-Dtest.debug</td>
+<td>命令行删除，使用--debug-jvm替代</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>语法修改</td>
+<td>-u / --no-search-upward</td>
+<td>命令行删除，使用settings.gradle文件</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>语法修改</td>
+<td>--recompile-scripts</td>
+<td>命令行删除</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>语法修改</td>
+<td>DirectoryBuildCache.setTargetSizeInMB(long)方法已被删除</td>
+<td>改成DirectoryBuildCache.removeUnusedEntriesAfterDays</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>语法修改</td>
+<td>.org.gradle.readLoggingConfigFile系统属性不再执行任何操作</td>
+<td>使用java.util.logging设置</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>文件操作</td>
+<td>不再可以使用as关键字或asType()方法将FileCollection对象转换为其他类型</td>
+<td>无</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>文件操作</td>
+<td>不能再传递null作为CopySpec.from（Object，Action）的配置</td>
+<td>无</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>文件操作</td>
+<td>CopySpec.duplicatesStrategy不再可以为空</td>
+<td>默认值的方法. 请改用DuplicatesStrategy.INHERIT</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>文件操作</td>
+<td>FileCollection.stopExecutionIfEmpty()方法已被删除</td>
+<td>在FileCollection任务属性上使用@SkipWhenEmpty批注</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>文件操作</td>
+<td>FileCollection.add()方法已删除</td>
+<td>使用Project.files（）和Project.fileTree（）创建可配置的文件集合/文件树，并通过ConfigurableFileCollection.from（）将其添加到它们</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>文件操作</td>
+<td>SimpleFileCollection已被删除</td>
+<td>改为使用Project.files（Object ...）</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>文件操作</td>
+<td>无法扩展AbstractFileCollection改用Project.files（）方法</td>
+<td>改为使用getBuildDependencies()方法</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Java构建</td>
+<td>CompileOptions.bootClasspath属性已被删除</td>
+<td>请改用CompileOptions.bootstrapClasspath</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Java构建</td>
+<td>无法将-source-path用作通用编译器参数</td>
+<td>CompileOptions.sourcepath</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Java构建</td>
+<td>无法将-processorpath用作通用编译器参数</td>
+<td>应改用CompileOptions.annotationProcessorPath</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Java构建</td>
+<td>不再自动应用编译类路径上的注释处理器</td>
+<td>应改用CompileOptions.annotationProcessorPath</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Java构建</td>
+<td>testClassesDir属性已从&quot; 测试&quot;任务中删除</td>
+<td>改用testClassesDirs</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Java构建</td>
+<td>从JDepend任务和SourceSetOutput中都删除了classesDir属性</td>
+<td>改用JDepend.classesDirs和SourceSetOutput.classesDirs属性</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Java构建</td>
+<td>JavaBasePlugin.configureForSourceSet()方法已被删除</td>
+<td></td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Java构建</td>
+<td>不可以创建自己的JavaPluginConvention ， ApplicationPluginConvention ， WarPluginConvention ， EarPluginConvention ， BasePluginConvention和ProjectReportsPluginConvention实例</td>
+<td></td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Tasks &amp; properties</td>
+<td>删除了以下属性</td>
+<td>使用ObjectFactory.property（）创建Property实例</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Tasks &amp; properties</td>
+<td>删除了内部的@Option和@OptionValues注释</td>
+<td>改用公共@Option和@OptionValues</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Tasks &amp; properties</td>
+<td>删除了Task.deleteAllActions()方法</td>
+<td></td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Tasks &amp; properties</td>
+<td>删除了Task.dependsOnTaskDidWork()方法</td>
+<td>改用声明的输入和输出</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Tasks &amp; properties</td>
+<td>删除了TaskInternal的以下属性和方法</td>
+<td>重用的实用程序方法或Worker API代替直接执行任务</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Kotlin DSL</td>
+<td>Artifact配置访问器现在具有NamedDomainObjectProvider<Configuration>类型，而不是Configuration</td>
+<td>请参阅Gradle Kotlin DSL发行说明</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>Kotlin DSL</td>
+<td>PluginAware.apply<T>(to)重命名为PluginAware.applyTo<T>(target)</td>
+<td>请参阅Gradle Kotlin DSL发行说明</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>其他</td>
+<td>ConfigurableReport.setDestination(Object)方法已被删除</td>
+<td>改用ConfigurableReport.setDestination（File）</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>其他</td>
+<td>Signature.setFile(File)方法已被删除，只读的Signature.toSignArtifact属性已被删除</td>
+<td></td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>其他</td>
+<td>@DeferredConfigurable批注已被删除</td>
+<td></td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>其他</td>
+<td>方法isDeferredConfigurable()已从ExtensionSchema中删除</td>
+<td></td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>其他</td>
+<td>.IdeaPlugin.performPostEvaluationActions()和EclipsePlugin.performPostEvaluationActions()已被删除</td>
+<td></td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>其他</td>
+<td>BroadcastingCollectionEventRegister.getAddAction()方法已被删除</td>
+<td></td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>其他</td>
+<td>内部的org.gradle.util软件包默认不再导入</td>
+<td>显式导入</td>
+<td>是，若有，则需要修改</td>
+</tr>
+<tr>
+<td>其他</td>
+<td>Tooling API不能再使用Gradle 2.6以下的Gradle版本连接到构建</td>
+<td>升级到3.0</td>
+<td>是，若有，则需要修改，可能也涉及到QA的改动</td>
+</tr>
+</tbody>
+</table>
+<!-- more -->
+<!-- more -->
 <p>接下来，开撸：</p>
 <p>#升级Android Studio</p>
 <p>首先，要升级一下Android Studio：Android Studio -&gt; check for updates...<br>
@@ -53,7 +445,29 @@ gradle插件：3.5.3</p>
 <img src="https://Mozziehh.github.io/post-images/1581424635886.png" alt="" loading="lazy"></p>
 <p>升级完成之后效果：<br>
 <img src="https://Mozziehh.github.io/post-images/1581424849282.png" alt="" loading="lazy"></p>
+<!-- more -->
 <p>重启之后就是漫长的等待，没事，它等待它的，我们看看这Android Studio 3.5都干了啥：</p>
+<p>Android Gradle 插件 3.5.0 和 Android Studio 3.5 是一个重大版本，同时也是 Project Marble 计划的成果，该计划主要围绕 Android 开发者工具的三大核心领域进行改进，分别是系统运行状况、功能完善和错误修复。值得注意的是，本次更新的重中之重是提高项目的构建速度。</p>
+<p>要详细了解这些更新以及其他 Project Marble 更新，请参阅 Android 开发者博文或以下几个部分的内容。</p>
+<p>此版本的 Android 插件需要使用以下工具：</p>
+<p>Gradle 5.4.1 或更高版本。要了解详情，请阅读有关更新 Gradle 的部分。</p>
+<p>3.5.3（2019 年 12 月）<br>
+本次要更新对 Android Studio 3.5.3 构成补充，修复了各种错误并做出了多项性能改进。<br>
+3.5.2（2019 年 11 月）<br>
+本次要更新对 Android Studio 3.5.2 构成补充，修复了各种错误并做出了多项性能改进。要查看重要问题修复列表，请阅读版本更新博客上的相关博文。<br>
+3.5.1（2019 年 10 月）<br>
+本次要更新对 Android Studio 3.5.1 构成补充，修复了各种错误并做出了多项性能改进。要查看重要问题修复列表，请阅读版本更新博客上的相关博文。</p>
+<p>##增量注释处理<br>
+如果您在 gradle.properties 文件中设置了 android.databinding.incremental=true，数据绑定注释处理器支持增量注释处理。这项优化提高了增量构建的性能。要查看经过优化的注释处理器的完整列表，请参阅增量注释处理器表格。</p>
+<p>此外，KAPT 1.3.30 及更高版本也支持增量注释处理器，您可以通过在 gradle.properties 文件中添加 kapt.incremental.apt=true 来启用此支持。</p>
+<p>##可缓存的单元测试<br>
+通过将 includeAndroidResources 设置为 true，您可以允许单元测试使用 Android 资源、资产和清单，此时 Android Gradle 插件会生成包含绝对路径的测试配置文件，绝对路径会打破缓存可再定位性。您可以指示插件使用相对路径生成测试配置，以便通过在 gradle.properties 文件中添加以下内容来完全缓存 AndroidUnitTest 任务：<br>
+android.testConfig.useRelativePath = true</p>
+<p>##已知问题<br>
+在使用 Kotlin Gradle 插件 1.3.31 或更早版本时，您可能会在构建或同步项目时看到以下警告：</p>
+<p>WARNING: API 'variant.getPackageLibrary()' is obsolete and has been replaced<br>
+with 'variant.getPackageLibraryProvider()'.</p>
+<p>要解决此问题，请将插件升级到 1.3.40 或更高版本。</p>
 <p>##推荐内存设置</p>
 <p>现在，如果 Android Studio 检测到您可以通过增加操作系统应该为 Android Studio 进程（例如核心 IDE、Gradle 守护进程和 Kotlin 守护进程）分配的 RAM 上限来提高性能，它会通知您。您可以通过点击通知中的操作链接来接受推荐设置，或者，您可以通过以下方式手动调整这些设置：依次选择 File &gt; Settings（或者，在 macOS 上依次选择 Android Studio &gt; Preferences），然后在 Appearance &amp; Behavior &gt; System Settings 下找到 Memory Settings 部分。<br>
 <img src="https://Mozziehh.github.io/post-images/1581425138056.png" alt="" loading="lazy"></p>
@@ -76,17 +490,186 @@ Android Studio 3.5 对布局可视化、管理和互动功能进行了多项改�
 <p>##NDK 并排版本<br>
 现在，您可以并排使用 NDK 的多个版本。此功能可让您更灵活地配置项目，例如，如果项目在同一计算机上使用了不同版本的 NDK。</p>
 <p>如果您的项目使用 Android Gradle 插件 3.5.0 或更高版本，您还可以指定项目中每个模块应使用的 NDK 版本。您可以使用此功能来创建可重现的构建版本，并缓解 NDK 版本与 Android Gradle 插件之间的不兼容性。</p>
+<p>##从4.10更新过来的同学看这里<br>
+接下来我们来说说，Gradle升级的好处：<br>
+如果您尚未使用4.10版本，请跳至适用于当前Gradle版本的部分，然后逐步升级，直至到达此处. 然后，从Gradle 4.10移至5.0时应用这些更改.</p>
+<p>1.不再需要enableFeaturePreview('IMPROVED_POM_SUPPORT')和enableFeaturePreview('STABLE_PUBLISHING')标志. 现在默认情况下启用了这些功能.</p>
+<p>2.Gradle现在捆绑了Java 9及更高版本的JAXB . 您可以从org.gradle.jvmargs删除--add-modules java.xml.bind选项（如果已设置）.</p>
+<p>##其他可能会出现问题的点</p>
+<p>1.对publishing {}块的评估不再推迟到需要时才执行，但其行为与其他任何块一样. 如果您需要推迟评估，请使用afterEvaluate {} .</p>
+<p>2.Javadoc和Groovydoc任务现在在执行之前删除了文档的目标目录. 已添加它以从上一次任务执行中删除过时的输出文件.</p>
+<p>3.Java库分发插件现在基于Java库插件而不是Java插件 .<br>
+在应用Java插件时，其行为略有不同（例如，它添加了api配置）. 因此，请确保在升级后检查内部版本是否符合预期.</p>
+<p>4.CheckstyleReport和FindBugsReport的html属性现在返回一个CustomizableHtmlReport实例，该实例更易于从静态类型的语言（如Java和Kotlin）进行配置.</p>
+<p>5.以下重大更改将在Gradle 4.10中作为弃用警告显示：</p>
+<p>##General<br>
+&lt;&lt;对于任务定义不再有效. 换句话说，您不能使用语法task myTask &lt;&lt; { … } .<br>
+改用Task.doLast（）方法，如下所示：<br>
+task myTask {<br>
+doLast {<br>
+...<br>
+}<br>
+}<br>
+您不能再在域对象名称中使用以下任何字符，例如项目和任务名称：<space> / \ : &lt; &gt; &quot; ? * | .您也不应将.用作开头或结尾字符.</p>
+<p>##Running Gradle &amp; build environment<br>
+如前所述，Gradle不能再在Java 7上运行.但是，您仍然可以使用派生的编译和测试来构建和测试Java 6及更高版本的软件.</p>
+<p>1.The -Dtest.single command-line option has been removed — use test filtering instead.</p>
+<p>2.-Dtest.debug命令行选项已删除-使用--debug-jvm选项代替.</p>
+<p>3.-u / --no-search-upward命令行选项已被删除-确保所有构建均具有settings.gradle文件.</p>
+<p>4.--recompile-scripts命令行选项已删除.</p>
+<p>5.除非嵌套的构建具有settings.gradle文件，否则您不能再将Gradle嵌套在另一个Gradle构建的子目录中.</p>
+<p>6.DirectoryBuildCache.setTargetSizeInMB(long)方法已被删除-改用DirectoryBuildCache.removeUnusedEntriesAfterDays .</p>
+<p>7.org.gradle.readLoggingConfigFile系统属性不再执行任何操作-更新受影响的测试以使用您的java.util.logging设置.</p>
+<h2 id="文件操作">文件操作</h2>
+<p>1.您不再可以使用as关键字或asType()方法将FileCollection对象转换为其他类型.</p>
+<p>2.您不能再传递null作为CopySpec.from（Object，Action）的配置操作.</p>
+<p>3.为了与Kotlin DSL更好地兼容， CopySpec.duplicatesStrategy不再可以为空. 属性设置器不再接受null作为将属性重置为其默认值的方法. 请改用DuplicatesStrategy.INHERIT .</p>
+<p>4.FileCollection.stopExecutionIfEmpty()方法已被删除-在FileCollection任务属性上使用@SkipWhenEmpty批注.</p>
+<p>FileCollection.add()方法已删除-使用Project.files（）和Project.fileTree（）创建可配置的文件集合/文件树，并通过ConfigurableFileCollection.from（）将其添加到它们.</p>
+<p>5.SimpleFileCollection已被删除-改为使用Project.files（Object ...） .</p>
+<p>6.没有您自己的类扩展AbstractFileCollection改用Project.files（）方法. 此问题可能表现为缺少的getBuildDependencies()方法.</p>
+<p>##Java构建<br>
+1.CompileOptions.bootClasspath属性已被删除，请改用CompileOptions.bootstrapClasspath .</p>
+<p>2.您不能再将-source-path用作通用编译器参数，而应改用CompileOptions.sourcepath .</p>
+<p>3.您不能再将-processorpath用作通用编译器参数，而应改用CompileOptions.annotationProcessorPath .</p>
+<p>4.Gradle将不再自动应用编译类路径上的注释处理器，而应改用CompileOptions.annotationProcessorPath .</p>
+<p>5.testClassesDir属性已从&quot; 测试&quot;任务中删除-改用testClassesDirs .</p>
+<p>6.从JDepend任务和SourceSetOutput中都删除了classesDir属性. 请改用JDepend.classesDirs和SourceSetOutput.classesDirs属性.</p>
+<p>7.JavaLibrary(PublishArtifact, DependencySet)构造函数— Shadow Plugin使用了该构造函数，因此请确保至少升级到该插件的2.x版本.</p>
+<p>8.JavaBasePlugin.configureForSourceSet()方法已被删除.</p>
+<p>9.您不再可以创建自己的JavaPluginConvention ， ApplicationPluginConvention ， WarPluginConvention ， EarPluginConvention ， BasePluginConvention和ProjectReportsPluginConvention实例.</p>
+<p>10.Maven插件用于发布过时的Maven 2元数据格式. 它已更改，现在将发布Maven 3元数据，就像Maven Publish插件一样.<br>
+随着Maven 2支持的删除，配置唯一快照行为的方法也已删除. Maven 3仅支持唯一的快照，因此我们决定删除它们.</p>
+<p>##Tasks &amp; properties<br>
+1.删除了以下与惰性属性相关的旧类和方法-使用ObjectFactory.property（）创建Property实例：</p>
+<p>PropertyState<br>
+DirectoryVar<br>
+RegularFileVar<br>
+ProjectLayout.newDirectoryVar()<br>
+ProjectLayout.newFileVar()<br>
+Project.property(Class)<br>
+Script.property(Class)<br>
+ProviderFactory.property(Class)<br>
+使用任务配置避免 API配置和注册的任务对可以从配置操作中调用的其他方法有更多限制.</p>
+<p>2.内部的@Option和@OptionValues注释（软件包org.gradle.api.internal.tasks.options ）已被删除. 请改用公共@Option和@OptionValues批注.</p>
+<p>3.Task.deleteAllActions()方法已被删除，无法替代.</p>
+<p>4.Task.dependsOnTaskDidWork()方法已被删除-改用声明的输入和输出 .</p>
+<p>5.已删除TaskInternal的以下属性和方法-使用任务依赖项，任务规则，可重用的实用程序方法或Worker API代替直接执行任务.<br>
+execute()<br>
+executer<br>
+getValidators()<br>
+addValidator()<br>
+TaskInputs.file（Object）方法不能再使用可解析为单个常规文件以外的任何参数的参数来调用.<br>
+TaskInputs.dir（Object）方法不能再使用解析为单个目录以外的任何参数的参数来调用.<br>
+您不再可以通过TaskInputs和TaskOutputs注册无效的输入和输出.<br>
+TaskDestroyables.file()和TaskDestroyables.files()方法已被删除-改用TaskDestroyables.register（） .<br>
+SimpleWorkResult已被删除-使用WorkResult.didWork .<br>
+现在，覆盖4.8中弃用的内置任务会产生错误.<br>
+尝试替换内置任务将产生类似于以下内容的错误：</p>
+<blockquote>
+<p>Cannot add task 'wrapper' as a task with that name already exists.<br>
+Scala &amp; Play<br>
+不再支持Play 2.2-请升级您使用的Play版本.<br>
+ScalaDocOptions.styleSheet属性已被删除-Scala 2.11.8及更高版本中的Scaladoc Ant任务不再支持此属性.</p>
+</blockquote>
+<p>##Kotlin DSL<br>
+Artifact配置访问器现在具有NamedDomainObjectProvider<Configuration>类型，而不是Configuration<br>
+PluginAware.apply<T>(to)重命名为PluginAware.applyTo<T>(target) .<br>
+两项更改都可能导致脚本编译错误. 请参阅Gradle Kotlin DSL发行说明，以获取更多信息以及如何修复因上述更改而损坏的构建.</p>
+<p>##Miscellaneous<br>
+1.ConfigurableReport.setDestination(Object)方法已被删除-改用ConfigurableReport.setDestination（File） .</p>
+<p>2.Signature.setFile(File)方法已被删除-Gradle不支持更改生成的签名的输出文件.<br>
+只读的Signature.toSignArtifact属性已被删除-永远不应成为公共API的一部分.</p>
+<p>3.@DeferredConfigurable批注已被删除.</p>
+<p>4.方法isDeferredConfigurable()已从ExtensionSchema中删除.</p>
+<p>5.IdeaPlugin.performPostEvaluationActions()和EclipsePlugin.performPostEvaluationActions()已被删除.</p>
+<p>6.The `BroadcastingCollectionEventRegister.getAddAction()方法已被删除，无法替代.</p>
+<p>7.内部的org.gradle.util软件包默认不再导入.<br>
+理想情况下，您不应该使用此程序包中的类，但是，作为一种快速解决方案，您可以将显式导入添加到这些类的构建脚本中.</p>
+<p>8.The gradlePluginPortal() repository no longer looks for JARs without a POM by default.</p>
+<p>9.Tooling API不能再使用Gradle 2.6以下的Gradle版本连接到构建. 通过TestKit运行的构建也是如此.</p>
+<p>10.Gradle 5.0需要最低版本的Tooling API客户端版本3.0. 较旧的客户端库无法再使用Gradle 5.0运行构建.</p>
+<p>11.IdeaModule Tooling API模型元素包含用于检索资源和测试资源的方法，因此这些元素已从IdeaModule.getSourceDirs()和IdeaModule.getTestSourceDirs()的结果中删除.<br>
+In previous Gradle versions, the source field in SourceTask was accessible from subclasses. This is not the case anymore as the source field is now declared as private.</p>
+<p>12.在Worker API中， 不能再设置worker的工作目录 .<br>
+与依赖关系和版本约束有关的行为更改可能会影响少量用户.<br>
+对DefaultTask上的属性工厂方法进行了一些更改，这些更改可能会影响自定义任务的创建.</p>
 <p>#升级Gradle和Gradle插件</p>
 <p>升级跟砍传奇一样，只有你升级了之后才之后哪些是报错，哪些不是报错，报错了一个一个解决，都解决完成，升级完成。</p>
 <p>##报错一<br>
 ERROR: Unable to resolve dependency for ':58WuxianClient@wubaDebug/compileClasspath': Could not resolve com.anjuke.mobile:sign:1.1.2-SNAPSHOT.</p>
 <p>##报错二<br>
-WARNING: The following project options are deprecated and have been removed:<br>
-android.useDeprecatedNdk<br>
-NdkCompile is no longer supported</p>
+com.facebook.imagepipeline.image.CloseableAnimatedImage 错误:找不到符号<br>
+解决：经排查是因为&quot;com.facebook.fresco:animated-base&quot;这个库找不到导致，在原来的版本上是可以有这一层依赖的。它是在animated-gif下，不过目前看到的是没有的。所以，最后添加了对此库的依赖。</p>
+<p>##报错三<br>
+transformClassesAndResourcesWithR8ForWubaRelease FAILED<br>
+解决：这是R8编译时发生的错误，禁止R8即可；<br>
+Disables R8 for Android Library modules only.<br>
+android.enableR8.libraries = false<br>
+Disables R8 for all modules.<br>
+android.enableR8 = false</p>
+<p>##报错四<br>
+Caused by: com.android.tools.r8.utils.AbortException: Error: null, Cannot fit requested classes in the main-dex file (# methods: 69437 &gt; 65536)<br>
+[exec]  at com.android.tools.r8.utils.Reporter.a(:21)<br>
+[exec]  at com.android.tools.r8.utils.Reporter.a(:7)<br>
+[exec]  at com.android.tools.r8.dex.VirtualFile.a(:33)<br>
+[exec]  at com.android.tools.r8.dex.VirtualFile$e.a(:37)<br>
+[exec]  at com.android.tools.r8.dex.ApplicationWriter.a(:13)<br>
+[exec]  at com.android.tools.r8.dex.ApplicationWriter.write(:35)<br>
+[exec]  at com.android.tools.r8.D8.d(:44)<br>
+[exec]  at com.android.tools.r8.D8.b(:1)<br>
+[exec]  at com.android.tools.r8.utils.t.a(:23)</p>
+<p>分析：目前有两种方案，一种是没有配置multidex，一种是java的JDK没有升级1.8</p>
+<p>添加了android.enableD8=false之后，发现会报错：<br>
+Java 8 language support, as requested by 'android.enableD8.desugaring= true' in your gradle.properties file, is not supported when 'android.enableD8= false'</p>
+<p>现在反向思路解决不了问题，咱们就正向解决，让它放在main-dex里面，然后再分析，先保证打包能过去；<br>
+去掉了一些文件在主dex之后，继续开启编译之路，但是很快，就遇到了新的问题：</p>
+<p>##报错五<br>
+com.android.tools.build.apkzlib.zip.compress.Zip64NotSupportedException: Zip64 EOCD locator found but Zip64 format is not supported: /opt/build/temp/74638/beta/android/58WuxianClient/build/intermediates/transforms/proguard/wuba/release/0.jar</p>
+<p>从字面意思分析是从配置上支持了使用Zip64打包APK，但是发现我们release下的jar包不支持。那大概有两种思路，一种是让我们的包支持zip64，另外一种是想办法把zip64禁用。</p>
+<p>我尝试了本地打包，居然通过了，看的我老泪纵横：<br>
+Tasks spend time &gt; 50ms:<br>
+04:25.78   :58WuxianClient:multiDexListWubaDebug<br>
+04:17.27   :58WuxianClient:transformClassesWithDexBuilderForWubaDebug<br>
+02:41.24   :58WuxianClient:javaPreCompileWubaDebug<br>
+01:29.50   :58WuxianClient:mergeWubaDebugResources<br>
+01:06.02   :58WuxianClient:checkConflictDependencies<br>
+00:55.43   :58WuxianClient:mergeDexWubaDebug<br>
+00:46.11   :58WuxianClient:processWubaDebugResources<br>
+00:30.93   :58WuxianClient:mergeWubaDebugNativeLibs<br>
+00:28.55   :58WuxianClient:compileWubaDebugJavaWithJavac<br>
+00:24.20   :58WuxianClient:packageWubaDebug<br>
+00:21.95   :58WuxianClient:mergeWubaDebugJavaResource<br>
+00:19.80   :58WuxianClient:checkWubaDebugDuplicateClasses<br>
+00:14.39   :58WuxianClient:stripWubaDebugDebugSymbols<br>
+00:12.02   :58WuxianClient:processWubaDebugManifest<br>
+00:05.95   :58WuxianClient:transformClassesWithAjxForWubaDebug<br>
+00:04.09   :PublishDex:javaPreCompileDebug<br>
+00:03.39   :PublishDex:mergeDebugJavaResource<br>
+00:03.17   :PublishDex:transformClassesWithDexBuilderForDebug<br>
+00:02.84   :PublishDex:mergeExtDexDebug<br>
+00:02.67   :58WuxianClient:transformClassesWithCom.alibaba.arouterForWubaDebug<br>
+00:02.56   :PublishDex:compileDebugJavaWithJavac<br>
+00:02.29   :PublishDex:processDebugResources<br>
+00:01.87   :58WuxianClient:mergeWubaDebugAssets<br>
+00:01.04   :PublishDex:packageDebug<br>
+00:00.68   :PublishDex:processDebugManifest<br>
+00:00.63   :PublishDex:mergeDebugResources<br>
+00:00.26   :PublishDex:mergeDexDebug<br>
+00:00.22   :58WuxianClient:clean<br>
+00:00.11   :PublishDex:generateDebugBuildConfig<br>
+00:00.10   :PublishDex:checkDebugManifest<br>
+00:00.08   :PublishDex:preBuild<br>
+00:00.07   :58WuxianClient:mergeWubaDebugShaders<br>
+BUILD SUCCESSFUL in 11m 4s<br>
+53 actionable tasks: 53 executed<br>
+bjdhj-124-7:58ClientProject $</p>
+<p>看了一下具体的区别，发现我们是没有构建release的包的过程，本地目前用的是debug，而AVM用的是Release构建，想到这，我发现有一个配置：useProguard true，跟我本地配置是不太一样的。</p>
 <p>解决：<br>
 查看配置文件，发现我们配置了：android.useDeprecatedNdk=true，所以直接去掉就行了，编译器会自动帮我们做。</p>
-<h2 id=""></h2>
+<p>##参考链接<br>
+https://developer.android.google.cn/studio/releases/gradle-plugin?hl=zh_cn<br>
+https://www.jianshu.com/p/13a62e1ac396</p>
 ]]></content>
     </entry>
     <entry>
