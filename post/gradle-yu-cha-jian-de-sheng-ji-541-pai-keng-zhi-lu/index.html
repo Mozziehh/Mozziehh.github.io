@@ -2,9 +2,9 @@
   <head>
     <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Gradle与插件的升级-5.4.1排坑之旅 | mozzie</title>
+<title>Gradle与插件的升级-3.5排坑之旅 | mozzie</title>
 <meta name="description" content="书山有路勤为径，学海无涯苦作舟" />
-<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1584937716973">
+<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1589963085735">
 <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
 <link rel="stylesheet" href="https://Mozziehh.github.io/styles/main.css">
@@ -20,7 +20,7 @@
       <div class="main-content">
         <div class="site-header">
   <a href="https://Mozziehh.github.io">
-  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1584937716973" alt="">
+  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1589963085735" alt="">
   </a>
   <h1 class="site-title">
     mozzie
@@ -73,14 +73,14 @@
         <div class="post-detail">
           <article class="post">
             <h2 class="post-title">
-              Gradle与插件的升级-5.4.1排坑之旅
+              Gradle与插件的升级-3.5排坑之旅
             </h2>
             <div class="post-info">
               <span>
                 2020-02-11
               </span>
               <span>
-                35 min read
+                39 min read
               </span>
               
             </div>
@@ -114,6 +114,12 @@ android studio : 3.5.0（必须）<br>
 gradle : 5.4.1<br>
 gradle插件：3.5.3<br>
 SDK Build Tools： 28.0.3 +</p>
+<p>优点：<br>
+代码缩减（即摇树优化）：从应用及其库依赖项中检测并安全地移除未使用的类、字段、方法和属性（这使其成为了一个对于规避 64k 引用限制非常有用的工具）。例如，如果您仅使用某个库依赖项的少数几个 API，缩减功能可以识别应用“未”使用的库代码并仅从应用中移除这部分代码。如需了解详情，请转到介绍如何缩减代码的部分。<br>
+资源缩减：从封装应用中移除不使用的资源，包括应用库依赖项中的不使用的资源。此功能可与代码缩减功能结合使用，这样一来，移除不使用的代码后，也可以安全地移除不再引用的所有资源。如需了解详情，请转到介绍如何缩减资源的部分。<br>
+混淆处理：缩短类和成员的名称，从而减小 DEX 文件的大小。如需了解详情，请转到介绍如何对代码进行混淆处理的部分。<br>
+优化：检查并重写代码，以进一步减小应用的 DEX 文件的大小。例如，如果 R8 检测到从未采用过给定 if/else 语句的 else {} 分支，则会移除 else {} 分支的代码。如需了解详情，请转到介绍代码优化的部分。<br>
+默认情况下，在构建应用的发布版本时，R8 会自动执行上述编译时任务。不过，您也可以停用某些任务或通过 ProGuard 规则文件自定义 R8 的行为。 事实上，R8 支持所有现有 ProGuard 规则文件，因此您在更新 Android Gradle 插件以使用 R8 时，无需更改现有规则。</p>
 <p>#影响范围<br>
 根据下文的初步调研，这里给出影响范围，以备参考：<br>
 ##整体升级计划</p>
@@ -870,7 +876,46 @@ R8: Missing class: org.apache.harmony.xnet.provider.jsse.OpenSSLSocketImplWrappe
 [exec] R8: Missing class: org.springframework.data.redis.serializer.RedisSerializer<br>
 [exec] R8: Missing class: android.arch.paging.PositionalDataSource<br>
 [exec] R8: Missing class: org.springframework.web.servlet.view.AbstractView</p>
-<p>在混淆里面加入<br>
+<p>##问题十九<br>
+proguard.txt 里面有一个...那个问题得解决</p>
+<p>##问题二十</p>
+<h1 id="for-native-methods-see-httpproguardsourceforgenetmanualexampleshtmlnative">For native methods, see http://proguard.sourceforge.net/manual/examples.html#native</h1>
+<p>-keepclasseswithmembernames class * {<br>
+native <methods>;<br>
+}<br>
+-keepclasseswithmembernames,includedescriptorclasses class * {<br>
+native <methods>;<br>
+}<br>
+在混淆里面加入</p>
+<p>##问题二十一</p>
+<ul>
+<li>What went wrong:<br>
+[exec] Execution failed for task ':58WuxianClient:transformClassesAndResourcesWithR8ForWubaRelease'.<br>
+[exec] &gt; java.util.NoSuchElementException (no error message)<br>
+这是因为使用了不匹配的buildToolsVersion，将其改为buildToolsVersion=29.0.2好了</li>
+</ul>
+<p>##问题二十二<br>
+发布AAR报错<br>
+就在我以为我可以的时候，突然间发布AAR报错了，老子万念俱灰；</p>
+<p>Publishing a build scan to scans.gradle.com requires accepting the Gradle Terms of Service defined at https://gradle.com/terms-of-service. Do you accept these terms? [yes, no]<br>
+The response from https://scans-in.gradle.com/in/5.6.4/2.4.2 was not from the build scan server.<br>
+Your network environment may be interfering, or the service may be unavailable.</p>
+<p>If you believe this to be in error, please report this problem via https://gradle.com/scans/help/plugin and include the following via copy/paste:</p>
+<hr>
+<h2 id="gradle-version-564plugin-version-242request-url-httpsscans-ingradlecomin564242request-id-0bcae986-da07-4567-a4b2-5a32fd4079b0response-status-code-502response-content-type-texthtmlresponse-server-type-cloudflare">Gradle version: 5.6.4<br>
+Plugin version: 2.4.2<br>
+Request URL: https://scans-in.gradle.com/in/5.6.4/2.4.2<br>
+Request ID: 0bcae986-da07-4567-a4b2-5a32fd4079b0<br>
+Response status code: 502<br>
+Response content type: text/html<br>
+Response server type: cloudflare</h2>
+<p>Task has not declared any outputs despite executing actions</p>
+<p>Task ':WubaCommonsLib:mergeDebugNativeLibs' is not up-to-date because:<br>
+Output property 'cacheDir' file /Users/huhao/AndroidStudioProjects/wuba/58ClientProject/WubaCommonsLib/build/intermediates/incremental/debug-mergeNativeLibs/zip-cache has been removed.<br>
+Output property 'outputDir' file /Users/huhao/AndroidStudioProjects/wuba/58ClientProject/WubaCommonsLib/build/intermediates/merged_native_libs/debug/out has been removed.<br>
+Output property 'outputDir' file /Users/huhao/AndroidStudioProjects/wuba/58ClientProject/WubaCommonsLib/build/intermediates/merged_native_libs/debug/out/lib has been removed.</p>
+<p>https://s0docs0gradle0org.icopy.site/current/dsl/org.gradle.api.publish.maven.MavenPublication.html maven发布报错</p>
+<p>https://www.icode9.com/content-4-493255.html<br>
 ##参考链接<br>
 https://developer.android.google.cn/studio/releases/gradle-plugin?hl=zh_cn<br>
 https://www.jianshu.com/p/13a62e1ac396</p>
@@ -894,7 +939,13 @@ https://www.jianshu.com/p/13a62e1ac396</p>
 <p>https://developer.android.com/studio/build/shrink-code#java R8优化</p>
 <p>https://www.guardsquare.com/en/blog/proguard-and-r8 混淆优化说明</p>
 <p>https://fucknmb.com/2019/05/28/R8-%E8%B8%A9%E5%9D%91%E8%AE%B0/ R8踩坑记</p>
+<p>https://fucknmb.com/2017/06/01/Android-Gradle-Plugin%E6%BA%90%E7%A0%81%E9%98%85%E8%AF%BB%E4%B8%8E%E7%BC%96%E8%AF%91/<br>
+gradle源码查看<br>
+https://www.jianshu.com/p/11f030b2034f gradle插件源码查看</p>
 <p>https://android.googlesource.com/platform/tools/base/+/studio-master-dev/build-system/gradle-core/src/main/java/com/android/build/gradle/internal/scope/VariantScopeImpl.java</p>
+<p>https://zhuanlan.zhihu.com/p/62794593 关于脱糖</p>
+<p>https://www.cnblogs.com/skymxc/p/gradle-custom-plugin.html 开发一个gradle插件</p>
+<p>https://juejin.im/post/5c5bee986fb9a049bc4d1b58 缩减MainDex大小</p>
 
               </div>
               <div class="toc-container">
@@ -902,6 +953,17 @@ https://www.jianshu.com/p/13a62e1ac396</p>
 <li>
 <ul>
 <li><a href="#%E6%96%87%E4%BB%B6%E6%93%8D%E4%BD%9C">文件操作</a></li>
+</ul>
+</li>
+<li><a href="#for-native-methods-see-httpproguardsourceforgenetmanualexampleshtmlnative">For native methods, see http://proguard.sourceforge.net/manual/examples.html#native</a>
+<ul>
+<li><a href="#gradle-version-564plugin-version-242request-url-httpsscans-ingradlecomin564242request-id-0bcae986-da07-4567-a4b2-5a32fd4079b0response-status-code-502response-content-type-texthtmlresponse-server-type-cloudflare">Gradle version: 5.6.4<br>
+Plugin version: 2.4.2<br>
+Request URL: https://scans-in.gradle.com/in/5.6.4/2.4.2<br>
+Request ID: 0bcae986-da07-4567-a4b2-5a32fd4079b0<br>
+Response status code: 502<br>
+Response content type: text/html<br>
+Response server type: cloudflare</a></li>
 </ul>
 </li>
 </ul>
