@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://Mozziehh.github.io</id>
     <title>mozzie</title>
-    <updated>2020-05-20T08:25:21.708Z</updated>
+    <updated>2020-06-16T08:31:43.873Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://Mozziehh.github.io"/>
     <link rel="self" href="https://Mozziehh.github.io/atom.xml"/>
@@ -891,6 +891,7 @@ https://www.jianshu.com/p/11f030b2034f gradle插件源码查看</p>
 <p>https://zhuanlan.zhihu.com/p/62794593 关于脱糖</p>
 <p>https://www.cnblogs.com/skymxc/p/gradle-custom-plugin.html 开发一个gradle插件</p>
 <p>https://juejin.im/post/5c5bee986fb9a049bc4d1b58 缩减MainDex大小</p>
+<p>https://r8.googlesource.com/r8/+/refs/heads/master/compatibility-faq.md</p>
 ]]></content>
     </entry>
     <entry>
