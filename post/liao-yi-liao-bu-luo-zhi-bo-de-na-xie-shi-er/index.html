@@ -1,0 +1,750 @@
+<html>
+  <head>
+    <meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>聊一聊部落直播的那些事儿 | mozzie</title>
+<meta name="description" content="书山有路勤为径，学海无涯苦作舟" />
+<link rel="shortcut icon" href="https://Mozziehh.github.io/favicon.ico?v=1594080721387">
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.7.2/css/all.css" integrity="sha384-fnmOCqbTlWIlj8LyTjo7mOUStjsKC4pOpQbqyi7RrhN7udi9RwhKkMHpvLbHG9Sr" crossorigin="anonymous">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<link rel="stylesheet" href="https://Mozziehh.github.io/styles/main.css">
+
+<script src="https://cdn.bootcss.com/highlight.js/9.12.0/highlight.min.js"></script>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700">
+
+
+
+  </head>
+  <body>
+    <div class="main">
+      <div class="main-content">
+        <div class="site-header">
+  <a href="https://Mozziehh.github.io">
+  <img class="avatar" src="https://Mozziehh.github.io/images/avatar.png?v=1594080721387" alt="">
+  </a>
+  <h1 class="site-title">
+    mozzie
+  </h1>
+  <p class="site-description">
+    书山有路勤为径，学海无涯苦作舟
+  </p>
+  <div class="menu-container">
+    
+      
+        <a href="/" class="menu">
+          首页
+        </a>
+      
+    
+      
+        <a href="/archives" class="menu">
+          归档
+        </a>
+      
+    
+      
+        <a href="/tags" class="menu">
+          标签
+        </a>
+      
+    
+      
+        <a href="/post/about" class="menu">
+          关于
+        </a>
+      
+    
+  </div>
+  <div class="social-container">
+    
+      
+    
+      
+    
+      
+    
+      
+    
+      
+    
+  </div>
+</div>
+
+        <div class="post-detail">
+          <article class="post">
+            <h2 class="post-title">
+              聊一聊部落直播的那些事儿
+            </h2>
+            <div class="post-info">
+              <span>
+                2020-07-07
+              </span>
+              <span>
+                32 min read
+              </span>
+              
+            </div>
+            
+            <div class="post-content-wrapper">
+              <div class="post-content">
+                <h1 id="聊一聊部落直播的那些事儿">聊一聊部落直播的那些事儿</h1>
+<h2 id="1背景">1.背景</h2>
+<p>58同城作为国内最大的生活信息服务平台，一直致力于为用户解决生活难题，迄今为止我们开拓了工作、房、车、生活、服务、金融相关的大量细化业务，很大程度上方便了用户的生活。</p>
+<p>然而我们同时发现，用户生活中各式各样的困难很难全部细化为流程，为了方便用户解决个性化的问题，我们上线了“部落”业务。在这里，用户可以不受限于固定流程，自由地询问自己的困惑、分享自己的生活、获取自己需要的信息。</p>
+<p>为了让用户更方便、更高效地分享、获取信息，我们进一步提供了直播功能，这就是58同城中直播的应用场景。</p>
+<p>58同城做为接入方，负责接入TEG提供的视频/直播SDK，并在它的基础上进行封装，接下来将从两个部分来主要说明：</p>
+<ul>
+<li>做为接入方针对视频/直播SDK整体架构的理解；</li>
+<li>基于这种架构我们的设计实现思路；</li>
+</ul>
+<h2 id="2直播整体架构的理解">2.直播整体架构的理解</h2>
+<h3 id="21-整体架构">2.1 整体架构</h3>
+<p>众所周知，直播分为服务端和客户端两部分，客户端又分为推流端（主播）和拉流端（观众）。<br>
+要想实现直播功能，需要在服务端和客户端分别完成两部分：一个是音视频流的采集、传输、播放，另一个是客户端与服务端之间的长连接数据同步以及直播间（聊天室）生命周期控制等其他基础服务。</p>
+<p>整体结构如下图所示：</p>
+<figure data-type="image" tabindex="1"><img src="https://i.loli.net/2020/04/07/pWzDfBtjymAUvb5.png" alt="直播结构图.png" loading="lazy"></figure>
+<p>整体流程如下图所示：</p>
+<figure data-type="image" tabindex="2"><img src="https://i.loli.net/2020/04/07/s26F8yDiwnvdP53.png" alt="直播流程图.png" loading="lazy"></figure>
+<h3 id="22-音视频采集">2.2 音视频采集</h3>
+<h4 id="221-音频">2.2.1 音频</h4>
+<p>Android中采集音频流数据可以使用以下两个类：</p>
+<ul>
+<li><code>android.media.MediaRecorder</code>：集成了录音、编码、容器封装等多个步骤，可以直接输出aac、amr、3gp等格式的音频文件，其实内部也是使用了下面的AudioRecord类；</li>
+<li><code>android.media.AudioRecord</code>：AudioRecord属于较底层的API，可以输出PCM格式文件(脉冲编码调制，是未经压缩的音频采样数据裸流)，而且可以直接获取到实时音频流，更加符合我们的直播场景。</li>
+</ul>
+<p>在使用AudioRecord采集音频时，我们可以在构造方法中指定以下参数：</p>
+<pre><code class="language-java">/**
+ * @param audioSource 音频的输入源
+ * @param sampleRateInHz 采样率，44100Hz是通用频率，22050、16000、11025等只适用于特定机型
+ * @param channelConfig 声道
+ * @param audioFormat 采样格式，即一个采样点用几个字节表示
+ * @param bufferSizeInBytes 音频缓冲区大小，不能小于getMinBufferSize
+ */
+AudioRecord(int audioSource, int sampleRateInHz, int channelConfig, int audioFormat, int bufferSizeInBytes)
+</code></pre>
+<p>然后<code>startRecording</code>后通过<code>read</code>方法获取音频流输出到buffer数组中，这个音频流数据就是原始PCM格式的。</p>
+<h4 id="222-视频">2.2.2 视频</h4>
+<p>采集视频可以使用<code>android.hardware.Camera</code>类或者<code>android.hardware.camera2</code>相关类。</p>
+<h4 id="2221-camera">2.2.2.1 Camera</h4>
+<p>Camera使用较为简单，<code>setPreviewDisplay(SurfaceHolder)</code>或者<code>setPreviewTexture(SurfaceTexture)</code>设置渲染面板，<code>startPreview</code>开启预览后即可在<code>Camera.PreviewCallback#onPreviewFrame(byte[], Camera)</code>回调中获取到每一帧原始YUV格式的数据。</p>
+<h4 id="2222-camera2">2.2.2.2 Camera2</h4>
+<p>这是Google在android5.0推出的Camera API的升级版本，它有以下几个特点：</p>
+<ul>
+<li>架构设计更合理：camera2把framework和camera抽象为了AndroidDevice和CameraDevice，它们创建一个CameraCaptureSession会话，AndroidDevice发送CaptureRequest给CameraDevice，然后CameraDevice返回CameraMetadata数据对象；</li>
+<li>提供了很多Camera不支持的特性，例如30fps高清连拍、0延迟快门、RAW格式图片拍摄、噪音消除等</li>
+<li>依赖于HAL3(Hardware Abstraction Layer 硬件抽象层)，但是很多手机硬件还不能完全支持HAL3协议，很多特性并不一定都可以实现；</li>
+</ul>
+<p>由于很多设备仍然需要依赖老版本HAL，所以在未来一段时间里CameraAPI都不会删除，我们也可以暂时不做支持。</p>
+<h4 id="2223-yuv在58的演进-todo-huhao">2.2.2.3 YUV在58的演进 TODO-huhao</h4>
+<p>早期版本确实使用了YUV数据进行图像数据的处理及传递，目前已经放弃直接使用YUV格式数据，改为纹理输出，使用OpenGL ES直接对纹理数据进行处理，然后将纹理数据送入编码器<br>
+建议Camera与GLSurfaceView的运用一起讲解</p>
+<blockquote>
+<p>感兴趣的同学可以看一下Google的两个示例 <a href="https://github.com/googlearchive/android-Camera2Basic">android-Camera2Basic</a>, <a href="https://github.com/googlesamples/android-Camera2Video">android-Camera2Video</a></p>
+</blockquote>
+<h3 id="23降噪">2.3降噪：</h3>
+<h4 id="231-什么是降噪">2.3.1 什么是降噪？</h4>
+<p>“噪音是一类引起人烦躁、或音量过强而危害人体健康的声音。从环境保护的角度讲：凡是妨碍人们正常休息、学习和工作的声音，以及对人们要听的声音产生干扰的声音，都属于噪音。从物理学的角度讲：噪音是发声体做无规则振动时发出的声音”</p>
+<p>在直播的过程中，噪声主要由主播端传输一些除了主播想要表达的声音之外的额外声音。</p>
+<p>所以，降噪就是把在主播端发送这些带有杂音的音频数据进行一个噪声消除的过程。</p>
+<h4 id="232-有哪些降噪方案">2.3.2 有哪些降噪方案？</h4>
+<p>常见的开源降噪方案</p>
+<ul>
+<li>Speex</li>
+</ul>
+<p>Speex是一套主要针对语音的开源免费，无专利保护的应用集合，它不仅包括编解码器，还包括VAD(语音检测)、DTX(不连续传输)、AEC(回声消除)、NS(去噪)等实用模块。</p>
+<ul>
+<li>WebRTC</li>
+</ul>
+<p>WebRTC提供了视频会议的核心技术，包括音视频的采集、编解码、网络传输、显示等功能，并且还支持跨平台：Windows、Linux、Mac、Android。我们这里使用的就是WebRTC的音频处理模块audio_processing。</p>
+<ul>
+<li>RNNoise</li>
+</ul>
+<p>RNNoise降噪算法是根据纯语音以及噪声通过GRU训练来做。包含特征点提取、预料等核心部分。</p>
+<ul>
+<li>58降噪处理 TODO-huhao</li>
+</ul>
+<p>AcousticEchoCanceler（回声消除）</p>
+<p>NoiseSuppressor（降噪）</p>
+<p>AutomaticGainControl（自动增益）</p>
+<p>LoudnessEnhancer（响度增强）处理音频采集数据</p>
+<h4 id="233-webrtc的初步介绍">2.3.3 WebRTC的初步介绍？</h4>
+<p>WebRTC原本是基于Global IP Solutions公司的一个核心技术，与2010年被Google收购，随后开源。</p>
+<p>WebRTC 的本质是将实时通信应用所需要的音/视频捕获及处理模块、网络传输及会话控制等协议集成到Web浏览器中，从而屏蔽底层硬件实现或操作系统之间的差异。</p>
+<figure data-type="image" tabindex="3"><img src="https://i.loli.net/2020/05/08/a3Yu8MyP2rGkSJb.png" alt="zhibojiangzao.png" loading="lazy"></figure>
+<p>上图给出了基于WebRTC开源项目的WebRTC架构的一种实现。第三方Web App开发者可以通过浏览器提供Web API调用音/视频实时通信能力，相关接口函数需符合W3C组织的WebRTC 接口规范。 WebRTC开源项目向浏览器厂商提供相关功能的C++ API 以及代码实现，如音/视频捕获、音/视频处理引擎、网络传输协议、会话控制协议， 从而极大地减小项目开发的成本和风险。 其中，音频、视频处理引擎以及网络传输协议等模块是WebRTC架构新增的，以下将做进一步介绍。</p>
+<p>音频处理引擎是从声卡到网络侧音频媒体处理链的总体框架，需要提供如设备控制、语音编码(iLIBC/iSAC/G.711/G.722/PCM16)、NetEQ、加密、声音文件、声音处理、声音输出、 音量控制、 音/视频同步、 网络传输与流控(RTP/ RTCP)等功能。</p>
+<p>WebRTC 主要采用两种开源的语 音编码格式:iSAC (internet speech audio codec) 与 iLBC (internet low bitrate codec)，分别用于宽带与窄带语音编码。 iSAC 是一种用于 VoIP 及音频流的宽带或超宽带编码器， 由 Google 从 GIPS 公司获得并开源，使用 16 kHz 或 32 kHz 采样率， 支持 12~52 kbit/s 可变码率;iLBC 是一种专 为分组交换网络通信设计的窄带语音编/解码器，使用 8 kHz 采样率，帧长为 20 ms 时码率可控制为 13.33 kbit/s，帧长为 30 ms 时码率为 15.2 kbit/s。 其算法复杂度与 G.729a 相当， 但由于对分组丢失进行了特别处理， 在分组丢失率较高的网络环境下表现优异， 例如在分组丢失率为5%左右的网络环境下，可达到GSM网络的话音通话效果。</p>
+<p>声音处理针对音频数据进行处理， 包括回声消除 (acoustic echo canceler， AEC)、 自动增益 (automatic gain control，AGC)、降噪处理等功能，用来提升声音质量。 NetEQ 模块集成了自适应抖动缓冲区及错误掩盖功能，可减少网 络抖动和分组丢失对话音质量的影响，从而在尽量低的时延下提供高品质的话音通话。 回声消除模块实现了基于软件实时去除由于放音被麦克风再次捕获所造成的声学回响。 降噪模块主要使用信号处理手段除去各种背景噪声， 如VoIP中常见的嘶嘶声或风扇噪声。</p>
+<p>此外，WebRTC还有视频处理引擎，它主要负责摄像头到网络侧、网络侧到屏幕显 示的视频处理链。 视频编码部分提供视频设备控制、视频 编码、加密、图像增强等功能，WebRTC采用 VP8(I420)编 解码技术，本文暂时不做描述。</p>
+<h4 id="234-58app的具体应用">2.3.4 58APP的具体应用</h4>
+<p>APM模块集成WebRTC降噪功能</p>
+<p>在58多媒体整体架构上选择把降噪模块单独解耦提取一个APM module，方便58视频编辑、58直播等需要降噪业务统一调用。对外暴露工具类AudioNoiseHelp方便业务接入。APM module的规划以后会接入更多的音频处理模块，现在已经接入降噪、增益模块。</p>
+<p>由于58直播SDK支持音频采样率种类大于WebRTC支持的种类，因此需要对数据进行最优音频重采样处理。</p>
+<p>由于WebRTC只能处理320byte长度正整数倍的数据，但是58直播的音频采集数据在不同手机、不同采样率上得到的音频数据长度是不固定的，需要对数据进行切分处理。录音采集数据如果是byte格式的，假如长度是4096，那么直接把4096数据传入到WebRTC_NS里处理会出现杂音出现，所以在交给WebRTC_NS模块之前需要用个缓冲区来处理下，一次最多可以传入(4096/320)*320=3840长度数据，并且在数据处理完毕之后还需要用另外一个缓冲区来保证处理之后的长度仍然是4096个。</p>
+<p>经过调研对比，我们最终选用WebRTC方案，使用了其音频处理模块audio_processing。</p>
+<p>详情请看<a href="https://mp.weixin.qq.com/s/0wEI_h6mRLAwjNHisOJc-Q">音频降噪在58直播中的研究与实现</a><br>
+直播过程中录制音频时难免会有噪音产生，除了在硬件方面可以使用专业的直播工具之外，我们也可以在软件端通过对音频流进行处理达到<strong>降噪</strong>的目的。</p>
+<h3 id="24-编解码">2.4 编解码</h3>
+<p>刚刚采集到的原始音视频数据如果未经处理便直接上传的话，会有以下两个问题：</p>
+<ul>
+<li>原始数据庞大，直接传输会对服务端、客户端的网络传输产生很大的压力；</li>
+<li>android手机型号繁杂，他们采集的音视频格式很有可能是不一样的，这可能导致某些直播无法在部分用户的手机播放。</li>
+</ul>
+<p>为了解决这两个问题，我们就需要在上传前对原始数据进行<strong>编码</strong>，拉取音视频数据时再进行<strong>解码</strong>。</p>
+<h4 id="241-编码原理">2.4.1 编码原理</h4>
+<p>同样的一段视频，为什么经过编码之后数据量会变小呢？核心原理就是去除冗余数据，把一组像素值简化为一种描述。主要是从这几个维度去处理：</p>
+<ul>
+<li>空间冗余：一帧图片的像素点在横向和纵向上大多都会有相关性，对于聚集的相近或相同像素点，可以采用描述的方式去替代它们，从而减少数据量。举个极端的例子，假设长为64的数组[fff, fff...fff]表示一张8*8的白图，我们可以用&quot;8,8,fff&quot;去代替，虽然表述最终都是一个意思，但数据量就会大幅下降；</li>
+<li>时间冗余：连续的视频图像之间一般也会有很大的相关性，这里可以使用运动补偿算法去除掉这些冗余信息；</li>
+<li>视觉冗余：人类视觉并不能捕捉到所有变化，对于无感知的像素变化可以过滤掉；</li>
+<li>结构冗余：对于某些特定的图像区域，可以根据纹理推断出像素值的分布规律；</li>
+<li>知识冗余：对于某些图像可以根据现有的经验找到其规律，从而根据经验推断出大量像素点；</li>
+<li>信息熵冗余：一串数据并不全是有用的信息，对于附加数据可以简化；</li>
+</ul>
+<h4 id="242-原始格式">2.4.2 原始格式</h4>
+<ul>
+<li>视频：android端采集的原始数据是YUV格式，就像RGB格式分为RGB565、RGB555、RGB8888一样，YUV也分为很多种，比较常见的有NV21、YUV444、YUV422、YUV420等；视频采集时需要考虑图像格式、分辨率、采样率、帧率等参数；</li>
+<li>音频：android端采集的原始数据是PCM格式，采集时需要设置采样率、采样数(即位宽)、声道等参数；考虑人耳的分辨能力，一般采用44.1kHz/16bit/双声道。</li>
+</ul>
+<h4 id="243-编码格式">2.4.3 编码格式</h4>
+<p>编码格式有非常多，常见的有以下几类：</p>
+<ul>
+<li>视频：H.26X系列、MPEG系列；</li>
+<li>音频：MP3、AAC、WMA、AMR、OGG、FLAC等。</li>
+</ul>
+<p>58直播选择视频格式是H.264，它有以下优点：</p>
+<ol>
+<li>具有较高的数据压缩比，同等图像质量下，H.264压缩后的数据量只有MPEG2的1/8，MPEG4的1/3；</li>
+<li>视频画质更高，能够在低码率下提供高质量的视频图像；</li>
+<li>提供错误恢复功能，提供了解决网络传输包丢失问题的工具；</li>
+</ol>
+<p>音频格式则是选择AAC，它在音质与压缩比方面做到了比较好的平衡，根据欧洲广播联盟在2003年的<a href="https://blog.csdn.net/leixiaohua1020/article/details/11730661">测评</a>,在码率较低的情况下，几种不同编码方案的音频的音质排序为：AAC+ &gt;  MP3PRO &gt; AAC &gt; RealAudio &gt; WMA &gt; MP3。</p>
+<blockquote>
+<p>另外，需要区分下<strong>文件封装格式</strong>和<strong>编码格式</strong>，封装格式包括AVI、MP4、TS、FLV、MKV、RMVB等。封装格式可以认为是一个容器，视频编码和音频编码通过muxer生成封装格式，例如我们最终就是生成了flv格式。</p>
+</blockquote>
+<h4 id="244-编码方式">2.4.4 编码方式</h4>
+<p>选定编码格式后，我们还需要在两种编码方式中做选择：</p>
+<ul>
+<li>软编码：即通过软件方式进行编码，内部是使用CPU；</li>
+<li>硬编码：即通过硬件编码，是利用手机硬件芯片GPU。</li>
+</ul>
+<p>它们的优缺点是互补的：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>优点</th>
+<th>缺点</th>
+<th>使用方式</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>软编码</td>
+<td>兼容性强，而且画面精细</td>
+<td>速度稍慢，功耗高</td>
+<td>第三方编码库</td>
+</tr>
+<tr>
+<td>硬编码</td>
+<td>速度快，功耗低</td>
+<td>兼容性差，需要适配</td>
+<td>系统API调用硬件模块</td>
+</tr>
+</tbody>
+</table>
+<p>综上所述，直播SDK采用的方案是这样：</p>
+<table>
+	<tr>
+	    <th></th>
+	    <th>音频</th>
+	    <th>视频</th>  
+	</tr >
+	<tr >
+	    <td>软编码</td>
+	    <td>faac</td>
+	    <td>open264</td>
+	</tr>
+	<tr>
+	    <td>硬编码</td>
+	    <td colspan="2" align="center">MediaCodec</td>
+	</tr>
+</table>
+<p><em>注：faac是编码库，与之对应还有一个解码库faad。</em></p>
+<p>对这一部分的细节我们公众号也有比较详细的介绍：<a href="https://mp.weixin.qq.com/s/UpAyMzfXgdQaOqCkuQ6VIw">Android音视频开发之MediaCodec编解码</a>，<a href="https://mp.weixin.qq.com/s/ck3fzTaLxaury1krEC55yg">短视频sdk编解码方案总结</a>，<a href="https://mp.weixin.qq.com/s/I6vulO1-ZSpD2b-Es2tQIQ">58技术沙龙第十三期-音视频技术实践</a></p>
+<h4 id="245-推拉流协议">2.4.5 推拉流协议</h4>
+<p>当完成音视频数据的本地处理后，我们需要把数据推送给服务器，目前<strong>推流协议</strong>主要有以下三种：</p>
+<ol>
+<li>RTMP：Real Time Messaging Protocol（实时消息传输协议），基于TCP连接，它是目前市面上最主流的流媒体传输协议，绝大多数直播产品均是使用此协议，它有以下特点：
+<ul>
+<li>协议简单，在各大平台上实现都比较容易；</li>
+<li>CDN友好，主流CDN厂商都支持；</li>
+<li>不支持浏览器推送；</li>
+</ul>
+</li>
+<li>WebRTC：Web Real Time Communication（网页实时通信），基于UDP，在弱网情况下表现较好，主流浏览器支持较好。缺点是如果直接使用浏览器推流，长时间直播稳定性较差，并且CDN支持也较差。</li>
+<li>基于UDP自行搭建：自行搭建的好处是自主性高，通过定制化的调优，可以达到比较好的优化效果；但是私有协议的弊端就是成本比较高，另外也不能支持主流CDN，需要自行搭建或者与CDN厂商定制。</li>
+</ol>
+<p><strong>拉流协议</strong>就比较多了，目前使用较多的主要有这四个：httpflv，rtmp，hls，dash。它们的差异如下：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center"></th>
+<th style="text-align:center">httpflv</th>
+<th style="text-align:center">rtmp</th>
+<th style="text-align:center">hls</th>
+<th style="text-align:center">dash</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center"><strong>传输方式</strong></td>
+<td style="text-align:center">http长连接</td>
+<td style="text-align:center">ftp流</td>
+<td style="text-align:center">http短连接</td>
+<td style="text-align:center">http短连接</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>视频封装格式</strong></td>
+<td style="text-align:center">flv</td>
+<td style="text-align:center">flv</td>
+<td style="text-align:center">m3u8,ts列表</td>
+<td style="text-align:center">Mp4,3gp,webm等</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>延时</strong></td>
+<td style="text-align:center">低</td>
+<td style="text-align:center">低</td>
+<td style="text-align:center">高</td>
+<td style="text-align:center">高</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>数据分段</strong></td>
+<td style="text-align:center">连续流</td>
+<td style="text-align:center">连续流</td>
+<td style="text-align:center">切片文件</td>
+<td style="text-align:center">切片文件</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>Html5兼容</strong></td>
+<td style="text-align:center">B站flv.js</td>
+<td style="text-align:center">使用插件</td>
+<td style="text-align:center">可解封包播放(hls.js)</td>
+<td style="text-align:center">mp4或webm切片时可直接播放</td>
+</tr>
+<tr>
+<td style="text-align:center"><strong>原理</strong></td>
+<td style="text-align:center">请求无限大文件</td>
+<td style="text-align:center">tcp数据流</td>
+<td style="text-align:center">分段http请求切片</td>
+<td style="text-align:center">分段http请求切片</td>
+</tr>
+</tbody>
+</table>
+<blockquote>
+<p>Bilibili开源库<a href="https://github.com/Bilibili/flv.js">flv.js</a>传送门，可以js+html实现flv的播放，无需flash。</p>
+</blockquote>
+<h3 id="25-cdn分发">2.5 CDN分发</h3>
+<h4 id="251-概念">2.5.1 概念</h4>
+<p>CDN即内容分发网络，使用CDN可以降低网络延迟，解决访问速度缓慢的问题。它的基本原理是将内容发布到遍布各地的大量CDN节点，后续用户访问时直接就近访问最优节点，这样就可以一定程度上避免网络拥堵、地域、运营商等因素带来的访问延迟问题，提高了用户体验。</p>
+<p>使用CDN的直播分发过程如下图：</p>
+<figure data-type="image" tabindex="4"><img src="https://i.loli.net/2020/04/08/A7Nwr1UpLKCv5Zq.png" alt="CDN.png" loading="lazy"></figure>
+<h4 id="252-cdn架构">2.5.2 CDN架构</h4>
+<p>不同的CDN厂商架构各不相同，但主要组成部分有以下几个：</p>
+<ol>
+<li>源站：即内容来源，对于直播来说就是主播推流端；</li>
+<li>缓存服务器：直接向用户提供访问服务，由一般大量服务器组成；</li>
+<li>智能DNS：这是CDN技术的核心所在，它负责将访问指向到距离用户最近、负载最小的缓存服务器。当用户发起访问时，会首先从智能DNS获取距离最近的一台缓存服务器ip，如果访问数据已经存在在该缓存服务器上，则直接返回数据；如果不存在的话会再向相邻近的缓存服务器或者源站抓取；</li>
+<li>客户端：即发起访问的用户，对于直播来说就是观众拉流端。</li>
+</ol>
+<h4 id="253-cdn缺点及限制">2.5.3 CDN缺点及限制</h4>
+<ul>
+<li>虽然可以提高网络稳定性，但是会提高数据初次访问的延迟，因为数据获取过程中间可能会经过多个节点的缓存；</li>
+<li>并不是所有的直播协议都能很好的支持CDN，支持较好的协议主要有RTMP、HTTP-FLV、HLS等，WebRTC协议并不能支持ICE、STUN、TURN等传统CDN，需要自建CDN服务。</li>
+</ul>
+<p>对于直播业务来说直播稳定性要比延迟要重要的多，接入CDN还是很有必要的，58APP这里是使用了腾讯的CDN服务。</p>
+<h4 id="254-长连接数据同步">2.5.4 长连接数据同步：</h4>
+<p>网络IO模型根据是否阻塞是否异步有很多种变种，其中jdk提供的有以下三种：（这个不用介绍，直接从websocket框架入手）</p>
+<ul>
+<li>BIO(Blocking IO)，同步阻塞：一请求对应一线程，在io完成之前，线程会一直等待，效率较差；</li>
+<li>NIO(Non-Blocking IO)，同步非阻塞：不阻塞等待，如果数据不能立即获取到时直接返回错误，需要内部添加轮询机制；</li>
+<li>AIO(Asynchonized IO)，异步io：自jdk1.7版本升级而来，不阻塞，也无需轮询，数据成功获取时会通过消息回调方式通知调用方。</li>
+</ul>
+<p>这里我们采用了基于NIO开发的WebSocket框架, 效率满足需求且接入方便。</p>
+<blockquote>
+<p>其实我们平时使用的okhttp，其内部依赖的okio也是NIO模型。</p>
+</blockquote>
+<p>以上各模块完成后，主播端已经基本成型了。而观众端除了长连接之外实现一个支持对应格式的视频播放器即可，这里不做详细说明。</p>
+<h3 id="26-最优的接入方式">2.6 最优的接入方式</h3>
+<p>直播SDK将被分为多个模块（单一职责原则）：pusherRequest长连接数据同步，capture音视频采集，core/hardcodec/softcodec编解码，pusherwrapper音视频推流等。</p>
+<p>其中部分模块设计如下：</p>
+<h4 id="261-长连接数据同步-pusherrequest">2.6.1 长连接数据同步-pusherRequest</h4>
+<p>SDK封装内部实现，仅向外提供WLiveRequestKit和MessageSessionListener两个主类，具体结构如下</p>
+<figure data-type="image" tabindex="5"><img src="https://i.loli.net/2020/03/25/VMWrlnOG5JmcoyH.png" alt="pusherrequest结构.png" loading="lazy"></figure>
+<p>pusherRequest库遵循接口隔离的设计原则，对外（业务方）仅通过<code>new WLiveRequestKit(MessageSessionListener)</code>发生联系，对底层WebSocket设立两个中间层WSHelper和WSConnection进行包装。</p>
+<p>这样可以保证业务方对sdk内部修改无感知，也可以降低sdk与底层实现的耦合程度，哪怕替换了WebSocket核心实现，也不会造成太大的改动。</p>
+<h4 id="262-音视频推流-pusherwrapper">2.6.2 音视频推流-pusherWrapper</h4>
+<p>SDK向外暴露PusherPresenter和IPusherView，其中PusherPresenter用于调用sdk内逻辑，IPusherView提供了大量生命周期回调以及sdk配置注入方法，具体结构如下：</p>
+<figure data-type="image" tabindex="6"><img src="https://i.loli.net/2020/03/25/OyR9sTcFntP2Sbf.png" alt="pusherwrapper结构.png" loading="lazy"></figure>
+<p>可以看到，不同的模块分别交由不同的类去实现，对于不同的实现（比如软硬解码的选择）通过抽象注入的方式实现依赖倒置，这样可以较大限度的实现解耦，其中某一块发生变动时，不仅影响不到业务方，甚至sdk中也可以把影响范围控制到最小。</p>
+<h2 id="3-部落直播">3. 部落直播</h2>
+<p>基于上面对于直播的理解，那么在接入直播时，我们就可以更好地设计与实现我们的现有框架：</p>
+<p>部落主要有三个部分：<strong>部落发布页</strong>、<strong>部落详情页</strong>、<strong>部落直播页</strong>；部落发布页面一部分是RN页面，发布的相册是我们提供的交互组件；部落详情页主要是我们维护的页面；部落直播是入TEG提供的SDK，也是本文主要介绍的内容；</p>
+<blockquote>
+<p>同时，我们也在撰写《关于部落你应该知道的一切》敬请期待</p>
+</blockquote>
+<p>咳咳，回归主题：部落直播主要分为主播端和观众端，具体的页面如下：</p>
+<figure data-type="image" tabindex="7"><img src="https://i.loli.net/2020/05/08/wtkJQop3Pz5vNFH.jpg" alt="tribelive.jpg" loading="lazy"></figure>
+<figure data-type="image" tabindex="8"><img src="https://i.loli.net/2020/05/08/bysoq5pD4CinTuL.jpg" alt="tribeliveau.jpg" loading="lazy"></figure>
+<p>部落直播分为主播端和观众端两个Activity，利用同一个LiveSurfaceFragment作为界面交互展示，通过它与LiveSurfacePresenter进行交互。整体使用MVP模式，类结构图如下：</p>
+<figure data-type="image" tabindex="9"><img src="https://i.loli.net/2020/05/08/vkc1A6QLsM3qJ2Y.png" alt="zhibo.png" loading="lazy"></figure>
+<h3 id="31-直播数据的主要来源">3.1 直播数据的主要来源</h3>
+<p>APP端即可以当做主播端也可以当做观众端，数据的主要来源有三个部分：跳转协议数据、详情页数据、TEG下发的推流数据协议；</p>
+<p>它们分别充当不同的功能：</p>
+<ul>
+<li>当数据消息必须要实时展示给观众时，使用跳转协议带过来，比如，是否需要美颜、旋转摄像头、礼物等。跳转协议通常是由FE生成，由wbmain://开头；</li>
+<li>当数据消息是个性化时，必须用户的头像、昵称数据等，通常是由Server来下发。</li>
+<li>当数据是在直播端进行动态变化时，比如公告、弹幕、禁言，用户聊天数据，这些都是由TEG将数据封装好消息流推送过来；</li>
+</ul>
+<h3 id="32-直播的四大功能区">3.2 直播的四大功能区</h3>
+<p>顶部功能区，右侧功能区，弹幕区，底部功能区。</p>
+<ul>
+<li>顶部功能区主要包括：头像展示区、用户列表区、公告栏等；</li>
+<li>右侧功能区：美颜、摄像头翻转、红包；</li>
+<li>弹幕：可以展示公告、用户评论、欢迎条、引导关注等逻辑，并可以侧滑消失；</li>
+<li>底部功能区包括：发言栏、红包、分享、礼物、点赞；</li>
+<li>此外，针对安居客推流涉及到横屏推送，还有在观众端实现全屏双击点赞功能；</li>
+</ul>
+<h4 id="321-顶部功能区">3.2.1 顶部功能区</h4>
+<h5 id="3211-头像部分">3.2.1.1 头像部分</h5>
+<p>头像部分数据由跳转协议传递过来：解析其中&quot;jump_data&quot;部分，并封装成LiveRecordBean在LiveSurfacePresenter中使用，最后调用mView.refreshAnchorInfo方法更新头像、昵称、简介、黄蓝V等数据；</p>
+<pre><code>mView.refreshAnchorInfo(
+                    mRecordBean.displayInfo.thumbnailImgUrl,
+                   formatAnchorInfoWord(mRecordBean.displayInfo.nickname),
+                    formatAnchorInfoWord(mRecordBean.displayInfo.introduction),
+                    mRecordBean.displayInfo.kol
+            );
+</code></pre>
+<h5 id="3212-用户列表区">3.2.1.2 用户列表区</h5>
+<p>用户进入直播间后，会接收到推流数据&quot;MSG_INIT_ROOM_SUCCESS = 1011&quot;，这个时候获取getJoinUserList()得到推流的用户列表</p>
+<pre><code>for (int i = joinSize - 1; i &gt;= 0; i--) {
+                UserInfo rf = roomInfo.getJoinUserList().get(i);
+                try {
+                    String indexId = rf.getId();
+                    // 主播，不加入列表
+                    if (mLiveUserId.equals(indexId)) {
+                        continue;
+                    } else if(audienceSelfBean == null &amp;&amp; !mIsLivePusher) {
+                        // 缓存audienceSelfBean
+                        if (audienceSelfId.equals(indexId)) {
+                            audienceSelfBean = new LiveRoomInfoBean(rf);
+                        }
+                    }
+
+                    // 检查列表中是否已经存在用户，存在的话移除掉，并在列表顶端加入新的用户
+                    int index = -1;
+                    if (mJoinList.size() &gt; 0) {
+                        int size = mJoinList.size();
+                        for (int j = 0; j &lt; size; j++) {
+                            LiveRoomInfoBean bean = mJoinList.get(j);
+                            if (bean.info.getId().equals(rf.getId())) {
+                                index = j;
+                                break;
+                            }
+                        }
+                        if (index &gt;= 0) {
+                            // 移除原先存在的用户
+                            mJoinList.remove(index);
+                        }
+                    }
+
+                    // 把新用户加入列表顶端
+                    mJoinList.add(0, new LiveRoomInfoBean(rf));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+            }
+</code></pre>
+<p>此时，还需要注意有用户退出时，要把用户列表中的数据进行清空；</p>
+<pre><code>void removeExitWatchersFromJoinList(RoomInfo roomInfo) {
+        if (roomInfo.getExitUserList() != null &amp;&amp; mJoinList.size() &gt; 0) {
+            synchronized (lock) {
+                for (UserInfo rf : roomInfo.getExitUserList()) {
+                    Iterator&lt;LiveRoomInfoBean&gt; iterator = mJoinList.iterator();
+                    while (iterator.hasNext()) {
+                        LiveRoomInfoBean bean = iterator.next();
+                        if (bean.info.getId().equals(rf.getId())) {
+                            iterator.remove();
+                            break;
+                        }
+                    }
+                }
+            }
+        }
+    }
+</code></pre>
+<p>以及，网络断开再恢复时，用户列表的刷新；</p>
+<h4 id="322-右侧功能区">3.2.2 右侧功能区</h4>
+<ul>
+<li>
+<p>右侧功能区在主播端主要包含美颜、翻转、镜像；</p>
+</li>
+<li>
+<p>观众端主要包含红包功能；</p>
+</li>
+</ul>
+<p>1.观众端配置一些可以发红包的用户id，在进入详情页之后可以向Server发起请求，判断是否可以发红包，此时会跳转到支付SDK提供H5页面，进入红包的发送功能；</p>
+<p>2.红包发送成功后，客户端会接收到10007的推流消息，并且弹出抢红包弹窗，弹窗20秒后自动关闭， 并且常驻在右上方，直到用户进行抢操作；</p>
+<pre><code>public static class LiveRedPacket {
+        public static final int REDPACKET_HAD_GOT = 0; //已经抢过
+        public static final int REDPACKET_GETTING = 1; //抢到红包弹窗
+        public static final int REDPACKET_GET_NOT = -1; //未抢到红包弹窗
+        public static final int REDPACKET_FOCUSE_NOT = -2; //未关注弹窗
+        public static final int REDPACKET_INVALIDATE = -3; //红包失效
+        public static final int MESSAGE_REDPACKET = 10007;
+    }
+</code></pre>
+<p>3.某用户后进入直播间，这时已经接受不到当时发红包的推流消息，所以通过详情页返回的数据判断是否有红包，有的话则弹出抢红包弹窗；</p>
+<p>4.用户进行抢红包操作后，会有抢到、未抢到、未关注、红包失效等各种状态码，客户端根据状态码进行进一步操作；</p>
+<ul>
+<li>
+<p>美颜使用的是TEG中SDK提供的功能，最终是调用了OpenGL中的shader。美颜由详情页数据“beauty”字段来控制，1是关，0是开启；默认是开启；</p>
+</li>
+<li>
+<p>翻转和镜像都很简单，就是调用了相机的API；</p>
+</li>
+</ul>
+<h4 id="323-弹幕区">3.2.3 弹幕区</h4>
+<p>直播的大部分消息都是通过推流过来的，弹幕也不例外。通过实现TEG提供的接口“WLiveRequestKit.MessageSessionListener”，即可以在重写的onMessageReceived的方法中获取到对应的推流消息；</p>
+<p>弹幕会根据推流的消息来决定弹出某些引导、策略性话术，比如公告、引导关注、引导评论、其他用户发来的评论消息，当然还包括删除消息，还有未读消息数展示等策略；</p>
+<pre><code>public static class LiveComment implements Serializable {
+        public int interval;//用户发送弹幕间隔时间
+        public String intervalToast;
+        public String notice;//房间公告
+        public SubscribeGuide subscribeGuide;
+        public CommentGuide commentGuide;
+        public Welcome welcome;
+    }
+</code></pre>
+<p>比如，引导评论是每隔4条（Server端来控制&quot;liveComment.welcome.interval &quot;）发送一次；引导关注也是由server下发，在下发多少条评论之后，展示一条引导关注；还有当其他用户进入直播间之后，可以展示欢迎xxx进入直播间等字样；</p>
+<p>最后，直播间弹幕外层包裹了TribeSwipeBackLayout用于用户在弹幕区域的展示状态，解决了滑动冲突，并且可以实现弹幕支持手势的左右滑动；</p>
+<h4 id="324-底部功能区">3.2.4 底部功能区</h4>
+<p>底部功能区包括底部评论区、分享、点赞；</p>
+<ul>
+<li>
+<p>底部评论区<br>
+底部评论区，主要使用部落详情页中的自定义键盘，并且传入表情符号，其中一个难点在于针对一加手机的适配问题。</p>
+</li>
+<li>
+<p>分享组件<br>
+分享主要调用的是我们自己的分享组件；通过跳转协议传进来的需要被分享的形式内容；</p>
+</li>
+<li>
+<p>点赞<br>
+点赞功能主要是长按点赞和单击点赞，使用贝塞尔曲线完成点赞内容动态上升；它主要是接收推流消息LivePusherListener中onMessageReceived里面LiveConstant.SOCKET_MESSAGE_TYPE_LIKE = 5 ，收到消息之后就会进行更新；</p>
+</li>
+</ul>
+<h2 id="4-直播优化的各种思考">4. 直播优化的各种思考</h2>
+<p>在梳理了代码逻辑结构之后和实际的开发过程中，发现从接入逻辑、设计层面、代码层面都有很多值得优化的地方。</p>
+<h3 id="41-代码层面的优化">4.1 代码层面的优化：</h3>
+<p>随着业务逻辑的扩充，P层现在已经越来越大，维护成本也会随之增加，主要包括以下几个方面：</p>
+<h4 id="411-p层任务过于繁重">4.1.1 P层任务过于繁重</h4>
+<p>现阶段是一个Presenter管理整个直播端和观众端，交互和数据全部在一个P层里面完成；</p>
+<p>拆分思路：整体页面逻辑严格按照功能区来划分，利用组合模式，按照功能区解耦，如果是组件和组件之间的通信可以使用父组件的形式进行交互；如果是数据传递，可以利用EventBus来传递；</p>
+<h4 id="412-公共数据从p层抽离">4.1.2 公共数据从P层抽离</h4>
+<p>问题：现在数据层主要来源有三个，跳转协议、推流、详情页获取，获取之后它们都保存在P层里面，并直接进行转发，这样会导致当跳转协议、推流、详情页中如果有数据公用时，会发生数据同步困难的问题；</p>
+<p>解决方案：在上层抽取成一个TribeSession类，用于专门存放跳转协议、推流、详情页数据三个Bean，需要同步时，只需要在获取之后进行一次同步即可，这样可以收敛逻辑；</p>
+<h4 id="413-整合断网逻辑抽取成公共组件扩展p层">4.1.3 整合断网逻辑，抽取成公共组件，扩展P层；</h4>
+<p>断网等控制逻辑，还在V层里面，这样的设计非常不友好，还是要抽离的干净一些；</p>
+<p>解决方法：V层的逻辑数据都要进行抽离；</p>
+<h3 id="42-直播用户体验优化">4.2 直播用户体验优化：</h3>
+<h4 id="421-降低直播延迟">4.2.1 降低直播延迟</h4>
+<ol>
+<li>
+<p>尝试开启CDN：CDN主要用来解决由于网络带宽小、用户访问量大、网点分布不均匀等导致用户访问网站速度慢的问题。通过在现有的网络中增加一层新的网络架构，将网站的内容发布到离用户最近的网络节点上，解决网络拥堵、访问延迟高的问题。</p>
+</li>
+<li>
+<p>使用动态码率：主播端在推流过程中，如果上行带宽较小，可以适当降低分辨率和帧率，从而降低码率。</p>
+</li>
+<li>
+<p>观看端降低画质：可以同时添加多种清晰度画质的支持，如果观看端网络状况不好，卡顿、丢帧现象比较严重，可以动态调整画质，接入较低的画质流。</p>
+</li>
+</ol>
+<h4 id="422-直播暂停状态的处理">4.2.2 直播暂停状态的处理</h4>
+<p>主播端暂停或切换到后台，如果不做处理直播画面会卡住，为了提高用户体验，可以设置一张占位图提示观众当前直播已暂停。</p>
+<p>设置占位图时可以按当前推流设置的宽、高对图片进行压缩，最终转换成视频流推送出去，在使用时需要注意占位图片的分辨率以及图片质量，避免过度压缩导致图片模糊，影响体验。</p>
+<h4 id="423-直播画面绿屏">4.2.3 直播画面绿屏</h4>
+<p>这是因为部分机型（例如Oppo R7、乐视1S）推流的输入源为NV21格式，并不支持硬解码导致，对于特定机型我们可以采用强制软编码的方式去避免此错误。</p>
+<h3 id="43-直播性能数据监控闭环">4.3 直播性能数据监控闭环</h3>
+<p>问题：目前还没有监控部落直播的性能体系，虽然在TEG那边会上传一些用户的数据，但是这些数据如果不在我们这边，对于我们也没有参考价值；</p>
+<p>解决方法：使用systrace + 插桩 &amp; MethodTraceMan等监控方式，对部落直播中的各个阶段进行监控；处理耗时问题并逐步进行优化；</p>
+<h2 id="结语">结语</h2>
+<p>直播技术发展到今天已经比较成熟，各类方案在技术社区均能找到，部分开源框架甚至可以做到半小时内快速搭建，实现简单的直播已经不再是难题。</p>
+<p>随着5G时代的到来，网络门限变得越来越小，直播业务也会在各个行业内呈现百花齐放百家争鸣的状态。58在积极探索自己的模式，追求用户的极致体验，为直播贡献一份绵薄之力，愿我们“只争朝夕，不负韶华”。</p>
+<blockquote>
+<p>参考文章：</p>
+<p>《Android音视频开发》</p>
+<p>https://cloud.tencent.com/document/product/454/7937</p>
+</blockquote>
+
+              </div>
+              <div class="toc-container">
+                <ul class="markdownIt-TOC">
+<li><a href="#%E8%81%8A%E4%B8%80%E8%81%8A%E9%83%A8%E8%90%BD%E7%9B%B4%E6%92%AD%E7%9A%84%E9%82%A3%E4%BA%9B%E4%BA%8B%E5%84%BF">聊一聊部落直播的那些事儿</a>
+<ul>
+<li><a href="#1%E8%83%8C%E6%99%AF">1.背景</a></li>
+<li><a href="#2%E7%9B%B4%E6%92%AD%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84%E7%9A%84%E7%90%86%E8%A7%A3">2.直播整体架构的理解</a>
+<ul>
+<li><a href="#21-%E6%95%B4%E4%BD%93%E6%9E%B6%E6%9E%84">2.1 整体架构</a></li>
+<li><a href="#22-%E9%9F%B3%E8%A7%86%E9%A2%91%E9%87%87%E9%9B%86">2.2 音视频采集</a>
+<ul>
+<li><a href="#221-%E9%9F%B3%E9%A2%91">2.2.1 音频</a></li>
+<li><a href="#222-%E8%A7%86%E9%A2%91">2.2.2 视频</a></li>
+<li><a href="#2221-camera">2.2.2.1 Camera</a></li>
+<li><a href="#2222-camera2">2.2.2.2 Camera2</a></li>
+<li><a href="#2223-yuv%E5%9C%A858%E7%9A%84%E6%BC%94%E8%BF%9B-todo-huhao">2.2.2.3 YUV在58的演进 TODO-huhao</a></li>
+</ul>
+</li>
+<li><a href="#23%E9%99%8D%E5%99%AA">2.3降噪：</a>
+<ul>
+<li><a href="#231-%E4%BB%80%E4%B9%88%E6%98%AF%E9%99%8D%E5%99%AA">2.3.1 什么是降噪？</a></li>
+<li><a href="#232-%E6%9C%89%E5%93%AA%E4%BA%9B%E9%99%8D%E5%99%AA%E6%96%B9%E6%A1%88">2.3.2 有哪些降噪方案？</a></li>
+<li><a href="#233-webrtc%E7%9A%84%E5%88%9D%E6%AD%A5%E4%BB%8B%E7%BB%8D">2.3.3 WebRTC的初步介绍？</a></li>
+<li><a href="#234-58app%E7%9A%84%E5%85%B7%E4%BD%93%E5%BA%94%E7%94%A8">2.3.4 58APP的具体应用</a></li>
+</ul>
+</li>
+<li><a href="#24-%E7%BC%96%E8%A7%A3%E7%A0%81">2.4 编解码</a>
+<ul>
+<li><a href="#241-%E7%BC%96%E7%A0%81%E5%8E%9F%E7%90%86">2.4.1 编码原理</a></li>
+<li><a href="#242-%E5%8E%9F%E5%A7%8B%E6%A0%BC%E5%BC%8F">2.4.2 原始格式</a></li>
+<li><a href="#243-%E7%BC%96%E7%A0%81%E6%A0%BC%E5%BC%8F">2.4.3 编码格式</a></li>
+<li><a href="#244-%E7%BC%96%E7%A0%81%E6%96%B9%E5%BC%8F">2.4.4 编码方式</a></li>
+<li><a href="#245-%E6%8E%A8%E6%8B%89%E6%B5%81%E5%8D%8F%E8%AE%AE">2.4.5 推拉流协议</a></li>
+</ul>
+</li>
+<li><a href="#25-cdn%E5%88%86%E5%8F%91">2.5 CDN分发</a>
+<ul>
+<li><a href="#251-%E6%A6%82%E5%BF%B5">2.5.1 概念</a></li>
+<li><a href="#252-cdn%E6%9E%B6%E6%9E%84">2.5.2 CDN架构</a></li>
+<li><a href="#253-cdn%E7%BC%BA%E7%82%B9%E5%8F%8A%E9%99%90%E5%88%B6">2.5.3 CDN缺点及限制</a></li>
+<li><a href="#254-%E9%95%BF%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5">2.5.4 长连接数据同步：</a></li>
+</ul>
+</li>
+<li><a href="#26-%E6%9C%80%E4%BC%98%E7%9A%84%E6%8E%A5%E5%85%A5%E6%96%B9%E5%BC%8F">2.6 最优的接入方式</a>
+<ul>
+<li><a href="#261-%E9%95%BF%E8%BF%9E%E6%8E%A5%E6%95%B0%E6%8D%AE%E5%90%8C%E6%AD%A5-pusherrequest">2.6.1 长连接数据同步-pusherRequest</a></li>
+<li><a href="#262-%E9%9F%B3%E8%A7%86%E9%A2%91%E6%8E%A8%E6%B5%81-pusherwrapper">2.6.2 音视频推流-pusherWrapper</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#3-%E9%83%A8%E8%90%BD%E7%9B%B4%E6%92%AD">3. 部落直播</a>
+<ul>
+<li><a href="#31-%E7%9B%B4%E6%92%AD%E6%95%B0%E6%8D%AE%E7%9A%84%E4%B8%BB%E8%A6%81%E6%9D%A5%E6%BA%90">3.1 直播数据的主要来源</a></li>
+<li><a href="#32-%E7%9B%B4%E6%92%AD%E7%9A%84%E5%9B%9B%E5%A4%A7%E5%8A%9F%E8%83%BD%E5%8C%BA">3.2 直播的四大功能区</a>
+<ul>
+<li><a href="#321-%E9%A1%B6%E9%83%A8%E5%8A%9F%E8%83%BD%E5%8C%BA">3.2.1 顶部功能区</a>
+<ul>
+<li><a href="#3211-%E5%A4%B4%E5%83%8F%E9%83%A8%E5%88%86">3.2.1.1 头像部分</a></li>
+<li><a href="#3212-%E7%94%A8%E6%88%B7%E5%88%97%E8%A1%A8%E5%8C%BA">3.2.1.2 用户列表区</a></li>
+</ul>
+</li>
+<li><a href="#322-%E5%8F%B3%E4%BE%A7%E5%8A%9F%E8%83%BD%E5%8C%BA">3.2.2 右侧功能区</a></li>
+<li><a href="#323-%E5%BC%B9%E5%B9%95%E5%8C%BA">3.2.3 弹幕区</a></li>
+<li><a href="#324-%E5%BA%95%E9%83%A8%E5%8A%9F%E8%83%BD%E5%8C%BA">3.2.4 底部功能区</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#4-%E7%9B%B4%E6%92%AD%E4%BC%98%E5%8C%96%E7%9A%84%E5%90%84%E7%A7%8D%E6%80%9D%E8%80%83">4. 直播优化的各种思考</a>
+<ul>
+<li><a href="#41-%E4%BB%A3%E7%A0%81%E5%B1%82%E9%9D%A2%E7%9A%84%E4%BC%98%E5%8C%96">4.1 代码层面的优化：</a>
+<ul>
+<li><a href="#411-p%E5%B1%82%E4%BB%BB%E5%8A%A1%E8%BF%87%E4%BA%8E%E7%B9%81%E9%87%8D">4.1.1 P层任务过于繁重</a></li>
+<li><a href="#412-%E5%85%AC%E5%85%B1%E6%95%B0%E6%8D%AE%E4%BB%8Ep%E5%B1%82%E6%8A%BD%E7%A6%BB">4.1.2 公共数据从P层抽离</a></li>
+<li><a href="#413-%E6%95%B4%E5%90%88%E6%96%AD%E7%BD%91%E9%80%BB%E8%BE%91%E6%8A%BD%E5%8F%96%E6%88%90%E5%85%AC%E5%85%B1%E7%BB%84%E4%BB%B6%E6%89%A9%E5%B1%95p%E5%B1%82">4.1.3 整合断网逻辑，抽取成公共组件，扩展P层；</a></li>
+</ul>
+</li>
+<li><a href="#42-%E7%9B%B4%E6%92%AD%E7%94%A8%E6%88%B7%E4%BD%93%E9%AA%8C%E4%BC%98%E5%8C%96">4.2 直播用户体验优化：</a>
+<ul>
+<li><a href="#421-%E9%99%8D%E4%BD%8E%E7%9B%B4%E6%92%AD%E5%BB%B6%E8%BF%9F">4.2.1 降低直播延迟</a></li>
+<li><a href="#422-%E7%9B%B4%E6%92%AD%E6%9A%82%E5%81%9C%E7%8A%B6%E6%80%81%E7%9A%84%E5%A4%84%E7%90%86">4.2.2 直播暂停状态的处理</a></li>
+<li><a href="#423-%E7%9B%B4%E6%92%AD%E7%94%BB%E9%9D%A2%E7%BB%BF%E5%B1%8F">4.2.3 直播画面绿屏</a></li>
+</ul>
+</li>
+<li><a href="#43-%E7%9B%B4%E6%92%AD%E6%80%A7%E8%83%BD%E6%95%B0%E6%8D%AE%E7%9B%91%E6%8E%A7%E9%97%AD%E7%8E%AF">4.3 直播性能数据监控闭环</a></li>
+</ul>
+</li>
+<li><a href="#%E7%BB%93%E8%AF%AD">结语</a></li>
+</ul>
+</li>
+</ul>
+
+              </div>
+            </div>
+          </article>
+        </div>
+
+        
+          <div class="next-post">
+            <div class="next">下一篇</div>
+            <a href="https://Mozziehh.github.io/post/recyclerview-de-gua-pei/">
+              <h3 class="post-title">
+                RecyclerView的适配
+              </h3>
+            </a>
+          </div>
+        
+
+        
+
+        <div class="site-footer">
+  Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a> | 
+  <a class="rss" href="https://Mozziehh.github.io/atom.xml" target="_blank">RSS</a>
+</div>
+
+<script>
+  hljs.initHighlightingOnLoad()
+
+  let mainNavLinks = document.querySelectorAll(".markdownIt-TOC a");
+
+  // This should probably be throttled.
+  // Especially because it triggers during smooth scrolling.
+  // https://lodash.com/docs/4.17.10#throttle
+  // You could do like...
+  // window.addEventListener("scroll", () => {
+  //    _.throttle(doThatStuff, 100);
+  // });
+  // Only not doing it here to keep this Pen dependency-free.
+
+  window.addEventListener("scroll", event => {
+    let fromTop = window.scrollY;
+
+    mainNavLinks.forEach((link, index) => {
+      let section = document.getElementById(decodeURI(link.hash).substring(1));
+      let nextSection = null
+      if (mainNavLinks[index + 1]) {
+        nextSection = document.getElementById(decodeURI(mainNavLinks[index + 1].hash).substring(1));
+      }
+      if (section.offsetTop <= fromTop) {
+        if (nextSection) {
+          if (nextSection.offsetTop > fromTop) {
+            link.classList.add("current");
+          } else {
+            link.classList.remove("current");    
+          }
+        } else {
+          link.classList.add("current");
+        }
+      } else {
+        link.classList.remove("current");
+      }
+    });
+  });
+
+</script>
+
+      </div>
+    </div>
+  </body>
+</html>
